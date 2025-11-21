@@ -8,6 +8,8 @@ import userRoutes from "./routes/user.routes.js";
 import moodRoutes from "./routes/mood.routes.js";
 import recommendationRoutes from "./routes/recommendation.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
+import resourceRoutes from "./routes/resource.routes.js";
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -18,11 +20,13 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use(errorMiddleware);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
 app.use("/api/recommendation", recommendationRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/resource", resourceRoutes);
 
 export default app;
