@@ -1,4 +1,5 @@
 import axios from "axios";
+import { mlPost } from "../ml/apiClient";
 
 export const askAI = async (message) => {
   try {
@@ -15,5 +16,14 @@ export const askAI = async (message) => {
 
     // Fallback response if AI fails
     return "I'm here with you. I may be having trouble responding fully, but you can share anything you're feeling.";
+  }
+};
+
+export const analyzeMoodText = async (text) => {
+  try {
+    const result = await mlPost("/predict", { text });
+    return result;
+  } catch {
+    return { sentiment: "neutral", moodScore: 5 };
   }
 };

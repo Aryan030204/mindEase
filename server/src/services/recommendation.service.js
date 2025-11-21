@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getActivitySuggestions } from "../ml/apiClient.js";
 import MoodLog from "../models/MoodLog.model.js";
 import Recommendation from "../models/Recommendation.model.js";
 
@@ -18,20 +19,13 @@ export const generatePersonalizedRecommendation = async (userId) => {
   // --------------------------------------------
   let aiSuggestions = [];
   try {
-    const { data } = await axios.post(process.env.AI_API_URL, payload, {
-      timeout: 5000,
-    });
-
+    const data = await getActivitySuggestions(
+      lastLog.moodScore,
+      lastLog.emotionTag
+    );
     aiSuggestions = data?.suggestions || [];
-  } catch (err) {
-    console.log("AI API Error:", err.message);
-
-    // fallback if ML API fails
-    if (lastLog.moodScore <= 4) {
-      aiSuggestions = ["meditation", "breathing", "journaling"];
-    } else {
-      aiSuggestions = ["music", "walk"];
-    }
+  } catch {
+    aiSuggestions = ["breathing", "walk", "journaling"]; // fallback
   }
 
   // Save recommendation entry
