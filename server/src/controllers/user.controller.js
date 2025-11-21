@@ -19,7 +19,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 // Update Profile
 // ----------------------
 export const updateProfile = asyncHandler(async (req, res) => {
-  const allowedUpdates = ["firstName", "lastName", "preferences", "pas];
+  const allowedUpdates = ["firstName", "lastName", "preferences", "pas"];
   const updates = {};
 
   Object.keys(req.body).forEach((key) => {
