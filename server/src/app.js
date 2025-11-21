@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes.js";
 import moodRoutes from "./routes/mood.routes.js";
 import recommendationRoutes from "./routes/recommendation.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
 app.use("/api/recommendation", recommendationRoutes);
+app.use("/api/chat", chatRoutes);
 
 export default app;
