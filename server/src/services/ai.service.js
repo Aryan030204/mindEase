@@ -1,5 +1,5 @@
 import axios from "axios";
-import { mlPost } from "../ml/apiClient";
+import { mlPost } from "../ml/apiClient.js";
 
 export const askAI = async (message) => {
   try {
