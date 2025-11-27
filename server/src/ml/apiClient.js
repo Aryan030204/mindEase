@@ -22,6 +22,6 @@ export const getMoodPrediction = async (text) => {
 };
 
 // Recommendation example
-export const getActivitySuggestions = async (moodScore, emotionTag) => {
-  return await mlPost("/recommend", { moodScore, emotionTag });
+export const getActivitySuggestions = async (moodScore, emotionTag, preferences = {}) => {
+  return await mlPost("/recommend", { moodScore, emotionTag, preferences });
 };

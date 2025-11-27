@@ -5,7 +5,10 @@ import User from "../models/User.model.js";
 
 export const generatePersonalizedRecommendation = async (userId) => {
   // Fetch the latest mood log
-  const lastLog = await MoodLog.findOne({ userId }).sort({ date: -1, createdAt: -1 });
+  const lastLog = await MoodLog.findOne({ userId }).sort({
+    date: -1,
+    createdAt: -1,
+  });
 
   if (!lastLog) return null;
 
@@ -17,56 +20,79 @@ export const generatePersonalizedRecommendation = async (userId) => {
     meditation: true,
   };
 
-  // Base recommendations based on mood
+  const preferenceFilters = {
+    exercise: ["workout", "walk", "yoga", "stretching", "nature_walk"],
+    music: ["music"],
+    meditation: ["meditation", "breathing", "yoga"],
+  };
+
+  const calmPool = [
+    "breathing",
+    "meditation",
+    "gratitude",
+    "digital_detox",
+    "therapy_check_in",
+  ];
+  const balancedPool = [
+    "walk",
+    "journaling",
+    "music",
+    "stretching",
+    "mindful_eating",
+  ];
+  const energizedPool = [
+    "workout",
+    "yoga",
+    "creative",
+    "social_check_in",
+    "nature_walk",
+  ];
+
   let baseSuggestions = [];
-  
   if (lastLog.moodScore <= 4) {
-    // Low mood - suggest uplifting activities
-    baseSuggestions = ["meditation", "music", "breathing"];
-    if (preferences.exercise) baseSuggestions.push("workout");
+    baseSuggestions = calmPool;
   } else if (lastLog.moodScore <= 6) {
-    // Medium mood - balanced activities
-    baseSuggestions = ["walk", "journaling", "breathing"];
-    if (preferences.music) baseSuggestions.push("music");
+    baseSuggestions = balancedPool;
   } else {
-    // High mood - maintain positive state
-    baseSuggestions = ["workout", "music", "journaling"];
-    if (preferences.exercise && !baseSuggestions.includes("workout")) {
-      baseSuggestions.push("workout");
-    }
+    baseSuggestions = energizedPool;
   }
 
-  // --------------------------------------------
-  // HIT PYTHON/ML API SERVICE (Optional)
-  // --------------------------------------------
+  // Ask ML service for additional context-aware recommendations
   let aiSuggestions = [];
   try {
     const data = await getActivitySuggestions(
       lastLog.moodScore,
-      lastLog.emotionTag
+      lastLog.emotionTag,
+      preferences
     );
     if (data?.suggestions && Array.isArray(data.suggestions)) {
       aiSuggestions = data.suggestions;
-    } else {
-      aiSuggestions = baseSuggestions;
     }
   } catch (err) {
     console.error("ML recommendation error:", err.message);
-    aiSuggestions = baseSuggestions; // fallback to base suggestions
   }
 
+  // Combine ML suggestions with fallback pool
+  const combined = [...aiSuggestions, ...baseSuggestions];
+
   // Filter suggestions based on user preferences
-  const filteredSuggestions = aiSuggestions.filter((activity) => {
-    if (activity === "workout" || activity === "walk") return preferences.exercise;
-    if (activity === "music") return preferences.music;
-    if (activity === "meditation" || activity === "breathing") return preferences.meditation;
-    return true; // journaling and others are always allowed
+  const filteredSuggestions = combined.filter((activity) => {
+    let allowed = true;
+    if (preferenceFilters.exercise.includes(activity)) {
+      allowed = allowed && preferences.exercise;
+    }
+    if (preferenceFilters.music.includes(activity)) {
+      allowed = allowed && preferences.music;
+    }
+    if (preferenceFilters.meditation.includes(activity)) {
+      allowed = allowed && preferences.meditation;
+    }
+    return allowed;
   });
 
-  // If no suggestions after filtering, use base suggestions
-  const finalSuggestions = filteredSuggestions.length > 0 
-    ? filteredSuggestions 
-    : baseSuggestions;
+  const prioritized = Array.from(new Set(filteredSuggestions)).slice(0, 6);
+  const finalSuggestions =
+    prioritized.length > 0 ? prioritized : baseSuggestions.slice(0, 6);
 
   // Check if recommendation already exists for this mood log
   let recommendation = await Recommendation.findOne({
@@ -75,12 +101,10 @@ export const generatePersonalizedRecommendation = async (userId) => {
   });
 
   if (recommendation) {
-    // Update existing recommendation
     recommendation.suggestedActivities = finalSuggestions;
-    recommendation.status = "pending"; // Reset status when regenerating
+    recommendation.status = "pending";
     await recommendation.save();
   } else {
-    // Create new recommendation
     recommendation = await Recommendation.create({
       userId,
       moodLogId: lastLog._id,
@@ -93,12 +117,15 @@ export const generatePersonalizedRecommendation = async (userId) => {
 
 export const getGeneralRecommendations = () => {
   return [
-    "Drink water",
-    "Take a 10-min walk",
-    "Practice deep breathing",
-    "Write down your thoughts",
-    "Listen to calming music",
-    "Do a short stretching routine",
-    "Take a mindful pause",
+    "Drink a glass of water and stretch for two minutes",
+    "Take a mindful nature walk and notice five calming details",
+    "Practice a 4-7-8 breathing cycle for five rounds",
+    "Write down three thoughts you're grateful for today",
+    "Listen to a soothing playlist while focusing on your breath",
+    "Do a guided body scan or gentle yoga flow",
+    "Schedule a quick check-in with a friend or loved one",
+    "Spend five minutes in sunlight to reset your energy",
+    "Disconnect from screens for 30 minutes and read something uplifting",
+    "Plan a nourishing meal or snack and eat it mindfully",
   ];
 };

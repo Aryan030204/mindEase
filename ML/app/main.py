@@ -36,7 +36,8 @@ def predict_text(payload: PredictRequest):
 def recommend_activity(payload: RecommendRequest):
     activities = process_recommendation_request(
         payload.moodScore,
-        payload.emotionTag
+        payload.emotionTag,
+        payload.preferences,
     )
     return {
         "suggestions": activities

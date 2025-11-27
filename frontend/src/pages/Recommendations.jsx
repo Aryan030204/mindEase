@@ -15,22 +15,31 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 
-const ACTIVITY_ICONS = {
-  meditation: "🧘",
-  journaling: "📝",
-  music: "🎵",
-  workout: "💪",
-  breathing: "🌬️",
-  walk: "🚶",
+const ACTIVITY_LIBRARY = {
+  meditation: { icon: "🧘", title: "Guided Meditation", description: "Practice a 10-minute loving-kindness session." },
+  breathing: { icon: "🌬️", title: "Breathing Ritual", description: "Try box-breathing or the 4-7-8 technique." },
+  journaling: { icon: "📝", title: "Reflective Journaling", description: "Write freely for five minutes about your day." },
+  music: { icon: "🎵", title: "Mood Music", description: "Listen to a playlist that matches or lifts your mood." },
+  workout: { icon: "💪", title: "Movement Burst", description: "Complete a short strength or cardio circuit." },
+  walk: { icon: "🚶", title: "Mindful Walk", description: "Stroll outside and notice five calming details." },
+  yoga: { icon: "🧎", title: "Gentle Yoga", description: "Flow through a series of slow, grounding poses." },
+  stretching: { icon: "🤸", title: "Restorative Stretching", description: "Release tension with a guided stretch." },
+  nature_walk: { icon: "🌳", title: "Nature Reset", description: "Spend 15 minutes outside absorbing natural light." },
+  digital_detox: { icon: "📴", title: "Digital Detox", description: "Unplug from screens and check in with your senses." },
+  gratitude: { icon: "🙏", title: "Gratitude Pause", description: "List three things that brought you comfort today." },
+  creative: { icon: "🎨", title: "Creative Break", description: "Paint, doodle, cook, or tinker with a fun idea." },
+  social_check_in: { icon: "💬", title: "Social Check-in", description: "Connect with someone who energizes you." },
+  therapy_check_in: { icon: "🧠", title: "Therapy Touchpoint", description: "Review therapy notes or schedule a session." },
+  hydration_break: { icon: "💧", title: "Hydration Break", description: "Sip water or herbal tea and take three deep breaths." },
+  mindful_eating: { icon: "🥗", title: "Mindful Snack", description: "Enjoy a nourishing snack without multitasking." },
 }
 
-const ACTIVITY_DESCRIPTIONS = {
-  meditation: "Practice mindfulness and find inner peace",
-  journaling: "Express your thoughts and reflect on your day",
-  music: "Listen to calming or uplifting music",
-  workout: "Engage in physical exercise to boost mood",
-  breathing: "Practice deep breathing exercises",
-  walk: "Take a refreshing walk outdoors",
+const formatActivity = (id) => {
+  if (!id) return { title: "Wellness activity", description: "Take a mindful pause.", icon: "✨" }
+  const meta = ACTIVITY_LIBRARY[id]
+  if (meta) return meta
+  const friendly = id.replace(/_/g, " ")
+  return { title: friendly.charAt(0).toUpperCase() + friendly.slice(1), description: "A supportive activity.", icon: "✨" }
 }
 
 export default function Recommendations() {
@@ -114,25 +123,29 @@ export default function Recommendations() {
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-3">
                   {personalizedRec.data.recommendation.suggestedActivities?.map(
-                    (activity, index) => (
-                      <motion.div
-                        key={activity}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="flex items-center gap-2 rounded-lg border bg-card p-4"
-                      >
-                        <span className="text-2xl">
-                          {ACTIVITY_ICONS[activity] || "✨"}
-                        </span>
-                        <div className="flex-1">
-                          <p className="font-semibold capitalize">{activity}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {ACTIVITY_DESCRIPTIONS[activity] || "A wellness activity"}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )
+                    (activity, index) => {
+                      const meta = formatActivity(activity)
+                      return (
+                        <motion.div
+                          key={`${activity}-${index}`}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="flex items-start gap-3 rounded-lg border bg-card p-4"
+                        >
+                          <span className="text-2xl">{meta.icon}</span>
+                          <div className="flex-1">
+                            <p className="font-semibold">{meta.title}</p>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              {activity.replace(/_/g, " ")}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {meta.description}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )
+                    }
                   )}
                 </div>
 
