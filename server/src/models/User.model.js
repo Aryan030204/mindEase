@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false, // never return password in queries
+      select: false,
     },
     role: {
       type: String,
@@ -46,8 +46,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for email lookups
-userSchema.index({ email: 1 });
-
-const User = mongoose.model("User", userSchema);
-export default User;
+export default mongoose.model("User", userSchema);

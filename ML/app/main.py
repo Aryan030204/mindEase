@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.schemas.predict_request import PredictRequest
 from app.schemas.recommend_request import RecommendRequest
 from app.services.ml_service import (
@@ -6,7 +7,16 @@ from app.services.ml_service import (
     process_recommendation_request
 )
 
-app = FastAPI()
+app = FastAPI(title="MindEase ML Server")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify exact origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -----------------------------
 # Sentiment Prediction Endpoint
@@ -34,4 +44,4 @@ def recommend_activity(payload: RecommendRequest):
 
 @app.get("/")
 def root():
-    return {"message": "MindEase ML Server Running"}
+    return {"message": "MindEase ML Server Running - Mood Prediction & Recommendations Only"}

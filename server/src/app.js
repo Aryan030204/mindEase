@@ -23,6 +23,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "MindEase API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// API info route
+app.get("/api", (req, res) => {
+  res.status(200).json({
+    name: "MindEase API",
+    version: "1.0.0",
+    endpoints: {
+      auth: "/api/auth",
+      user: "/api/user",
+      mood: "/api/mood",
+      recommendations: "/api/recommendations",
+      chat: "/api/chat",
+      resources: "/api/resources",
+    },
+  });
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -30,6 +55,15 @@ app.use("/api/mood", moodRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/resources", resourceRoutes);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl,
+  });
+});
 
 // Error handler
 app.use(errorMiddleware);

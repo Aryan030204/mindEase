@@ -6,7 +6,12 @@ import { hashPassword } from "../services/password.service.js";
 // Get Profile
 // ----------------------
 export const getProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password");
+  const mongoose = (await import("mongoose")).default;
+  const userId = mongoose.Types.ObjectId.isValid(req.user.id)
+    ? new mongoose.Types.ObjectId(req.user.id)
+    : req.user.id;
+
+  const user = await User.findById(userId).select("-password");
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
@@ -19,7 +24,12 @@ export const getProfile = asyncHandler(async (req, res) => {
 // Update Profile
 // ----------------------
 export const updateProfile = asyncHandler(async (req, res) => {
-  const allowedUpdates = ["firstName", "lastName", "preferences", "pas"];
+  const mongoose = (await import("mongoose")).default;
+  const userId = mongoose.Types.ObjectId.isValid(req.user.id)
+    ? new mongoose.Types.ObjectId(req.user.id)
+    : req.user.id;
+
+  const allowedUpdates = ["firstName", "lastName", "preferences", "password"];
   const updates = {};
 
   Object.keys(req.body).forEach((key) => {
@@ -34,10 +44,14 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
 
   const updatedUser = await User.findByIdAndUpdate(
-    req.user.id,
+    userId,
     { $set: updates },
     { new: true, runValidators: true }
   ).select("-password");
+
+  if (!updatedUser) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
   return res.status(200).json({
     message: "Profile updated successfully",
@@ -49,7 +63,19 @@ export const updateProfile = asyncHandler(async (req, res) => {
 // Delete Account
 // ----------------------
 export const deleteAccount = asyncHandler(async (req, res) => {
-  await User.findByIdAndDelete(req.user.id);
+  const mongoose = (await import("mongoose")).default;
+  const userId = mongoose.Types.ObjectId.isValid(req.user.id)
+    ? new mongoose.Types.ObjectId(req.user.id)
+    : req.user.id;
+
+  const user = await User.findByIdAndDelete(userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // TODO: Optionally delete related data (mood logs, conversations, etc.)
+  // This could be handled with MongoDB cascading deletes or manual cleanup
 
   return res.status(200).json({
     message: "Account deleted successfully",
