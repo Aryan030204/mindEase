@@ -9,13 +9,15 @@ export const askAI = async (message, conversationHistory = []) => {
   try {
     // Check if Gemini API key is configured
     if (!process.env.GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured in environment variables");
+      console.error(
+        "GEMINI_API_KEY is not configured in environment variables"
+      );
       return "I'm here to support you, but my AI service is not properly configured. Please contact support.";
     }
 
     // Initialize Gemini API
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // System prompt to ensure chatbot only responds to mental health topics
     const systemPrompt = `You are a compassionate and empathetic mental health support assistant for MindEase, a mental wellness application. 
@@ -36,9 +38,13 @@ IMPORTANT RULES:
 - Do not provide harmful advice or encourage dangerous behaviors
 
 Previous conversation context:
-${conversationHistory.length > 0 
-  ? conversationHistory.slice(-10).map(msg => `${msg.sender}: ${msg.text}`).join('\n')
-  : 'This is the start of the conversation.'
+${
+  conversationHistory.length > 0
+    ? conversationHistory
+        .slice(-10)
+        .map((msg) => `${msg.sender}: ${msg.text}`)
+        .join("\n")
+    : "This is the start of the conversation."
 }
 
 User's current message: ${message}
@@ -57,13 +63,16 @@ Provide a supportive, empathetic response focused on mental health and emotional
     return reply.trim();
   } catch (error) {
     console.error("Gemini API Error:", error.message);
-    
+
     // Fallback responses based on error type
     if (error.message.includes("API_KEY")) {
       return "I'm here to support you, but there's an issue with my configuration. Please try again later or contact support.";
     }
-    
-    if (error.message.includes("timeout") || error.message.includes("network")) {
+
+    if (
+      error.message.includes("timeout") ||
+      error.message.includes("network")
+    ) {
       return "I'm having trouble connecting right now, but I'm here for you. Please try again in a moment, or feel free to share what's on your mind.";
     }
 

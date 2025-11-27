@@ -128,6 +128,27 @@ export const getMoodAnalytics = asyncHandler(async (req, res) => {
     };
   }
 
+  // Build project stage with conditional fields
+  const projectStage = {
+    _id: 1,
+    avgMoodScore: { $round: ["$avgMoodScore", 2] },
+    count: 1,
+    emotionTags: 1,
+    dates: 1,
+    year: "$_id.year",
+  };
+  
+  if (period === "month") {
+    projectStage.month = "$_id.month";
+  } else {
+    projectStage.week = "$_id.week";
+  }
+
+  // Build sort stage
+  const sortStage = period === "month"
+    ? { $sort: { year: -1, month: -1 } }
+    : { $sort: { year: -1, week: -1 } };
+
   // Aggregate pipeline for analytics
   const analytics = await MoodLog.aggregate([
     { $match: { userId: userObjectId } },
@@ -140,16 +161,8 @@ export const getMoodAnalytics = asyncHandler(async (req, res) => {
         dates: { $push: "$date" },
       },
     },
-    {
-      $project: {
-        _id: 1,
-        avgMoodScore: { $round: ["$avgMoodScore", 2] },
-        count: 1,
-        emotionTags: 1,
-        dates: 1,
-      },
-    },
-    { $sort: { "_id.year": -1, "_id.week": period === "week" ? -1 : 0, "_id.month": period === "month" ? -1 : 0 } },
+    { $project: projectStage },
+    sortStage,
   ]);
 
   // Get emotion tag distribution
