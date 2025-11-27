@@ -88,22 +88,21 @@ Complete list of all environment variables used in the MindEase backend server.
   - Ensure the port is available and not blocked by firewall
   - For production, use standard ports (80 for HTTP, 443 for HTTPS with reverse proxy)
 
-### 6. **CLIENT_URL** (Optional but Recommended)
-- **Description**: Frontend application URL for CORS configuration
+### 6. **CLIENT_URL / CLIENT_URLS** (Optional but Recommended)
+- **Description**: Frontend application URL(s) for CORS configuration
 - **Used in**: `server/src/app.js`
 - **Example Values**:
   ```env
-  # Local development
-  CLIENT_URL=http://localhost:3000
-  
-  # Production
+  # Single origin
   CLIENT_URL=https://your-frontend-domain.com
-  CLIENT_URL=https://www.your-frontend-domain.com
+
+  # Multiple origins (comma separated)
+  CLIENT_URLS=https://your-frontend-domain.com,http://localhost:5173
   ```
 - **Notes**: 
-  - If not set, CORS may block frontend requests
-  - Can be a comma-separated list for multiple origins
-  - Should match your frontend deployment URL exactly
+  - If not set, defaults to allowing localhost:3000, localhost:5173, and the deployed domain
+  - Use `CLIENT_URLS` for multiple allowed origins (comma-separated)
+  - Required for frontend running on a different domain/port
 
 ### 7. **JWT_EXPIRES_IN** (Optional)
 - **Description**: JWT token expiration time
