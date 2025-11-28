@@ -11,6 +11,7 @@ import toast from "react-hot-toast"
 import { Heart, CheckCircle2 } from "lucide-react"
 import LoadingSpinner from "@/components/ui/LoadingSpinner"
 import { formatDate } from "@/lib/utils"
+import BackButton from "@/components/ui/BackButton"
 
 const EMOTIONS = ["happy", "sad", "anxious", "calm", "angry", "excited", "tired", "neutral"]
 const MOOD_COLORS = {
@@ -84,12 +85,17 @@ export default function MoodTracker() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
       >
-        <h1 className="text-3xl font-bold tracking-tight">Mood Tracker</h1>
-        <p className="text-muted-foreground">
-          Log your daily mood and track your emotional well-being
-        </p>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <h1 className="text-3xl font-bold tracking-tight">Mood Tracker</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Log your daily mood and track your emotional well-being
+          </p>
+        </div>
       </motion.div>
 
       <div className="grid gap-6 md:grid-cols-2">

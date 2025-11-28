@@ -12,6 +12,7 @@ import { User, Save, Trash2, Mail, Calendar } from "lucide-react"
 import toast from "react-hot-toast"
 import { getInitials } from "@/lib/utils"
 import { formatDate } from "@/lib/utils"
+import BackButton from "@/components/ui/BackButton"
 
 export default function Profile() {
   const { user, updateUser } = useAuth()
@@ -85,10 +86,13 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <User className="h-8 w-8" />
-          Profile
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <BackButton />
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <User className="h-8 w-8 text-primary" />
+            Profile
+          </h1>
+        </div>
         <p className="text-muted-foreground">
           Manage your account settings and preferences
         </p>

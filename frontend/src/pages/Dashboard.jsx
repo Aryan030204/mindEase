@@ -8,6 +8,7 @@ import { motion } from "framer-motion"
 import LoadingSpinner from "@/components/ui/LoadingSpinner"
 import { formatDate } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
+import BackButton from "@/components/ui/BackButton"
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -45,14 +46,19 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
       >
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, {user?.firstName}! 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your mental wellness journey
-        </p>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-fuchsia-500 to-sky-500 bg-clip-text text-transparent">
+              Welcome back, {user?.firstName}! 👋
+            </h1>
+          </div>
+          <p className="text-muted-foreground">
+            Here's an overview of your mental wellness journey
+          </p>
+        </div>
       </motion.div>
 
       {/* Quick Stats */}

@@ -22,6 +22,7 @@ import {
 } from "recharts"
 import LoadingSpinner from "@/components/ui/LoadingSpinner"
 import { TrendingUp, Calendar } from "lucide-react"
+import BackButton from "@/components/ui/BackButton"
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#00ff00", "#ff00ff", "#00ffff"]
 
@@ -67,10 +68,13 @@ export default function MoodAnalytics() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
       >
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Mood Analytics</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <BackButton />
+            <h1 className="text-3xl font-bold tracking-tight">Mood Analytics</h1>
+          </div>
           <p className="text-muted-foreground">
             Visualize your mood trends and emotional patterns
           </p>

@@ -14,6 +14,7 @@ import {
   Activity,
 } from "lucide-react"
 import toast from "react-hot-toast"
+import BackButton from "@/components/ui/BackButton"
 
 const ACTIVITY_LIBRARY = {
   meditation: { icon: "🧘", title: "Guided Meditation", description: "Practice a 10-minute loving-kindness session." },
@@ -90,10 +91,13 @@ export default function Recommendations() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Sparkles className="h-8 w-8" />
-          Recommendations
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <BackButton />
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            Recommendations
+          </h1>
+        </div>
         <p className="text-muted-foreground">
           Personalized activities and wellness tips to support your mental health
         </p>
