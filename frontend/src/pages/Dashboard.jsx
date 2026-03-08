@@ -1,29 +1,42 @@
-import { useQuery } from "@tanstack/react-query"
-import { moodAPI, recommendationAPI } from "@/lib/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Link } from "react-router-dom"
-import { Heart, TrendingUp, Sparkles, MessageSquare, ArrowRight, Calendar } from "lucide-react"
-import { motion } from "framer-motion"
-import LoadingSpinner from "@/components/ui/LoadingSpinner"
-import { formatDate } from "@/lib/utils"
-import { useAuth } from "@/contexts/AuthContext"
-import BackButton from "@/components/ui/BackButton"
+import { useQuery } from "@tanstack/react-query";
+import { moodAPI, recommendationAPI } from "@/lib/api";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Link } from "react-router-dom";
+import {
+  Heart,
+  TrendingUp,
+  Sparkles,
+  MessageSquare,
+  ArrowRight,
+  Calendar,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { formatDate } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import BackButton from "@/components/ui/BackButton";
 
 export default function Dashboard() {
-  const { user } = useAuth()
-  
+  const { user } = useAuth();
+
   const { data: latestMood, isLoading: moodLoading } = useQuery({
     queryKey: ["moodHistory"],
     queryFn: () => moodAPI.getHistory({ limit: 1 }),
-  })
+  });
 
   const { data: recommendations, isLoading: recLoading } = useQuery({
     queryKey: ["personalizedRecommendations"],
     queryFn: () => recommendationAPI.getPersonalized(),
-  })
+  });
 
-  const latestLog = latestMood?.data?.logs?.[0]
+  const latestLog = latestMood?.data?.logs?.[0];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -33,12 +46,12 @@ export default function Dashboard() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -71,7 +84,9 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Mood</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Today's Mood
+              </CardTitle>
               <Heart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -79,7 +94,9 @@ export default function Dashboard() {
                 <LoadingSpinner size="sm" />
               ) : latestLog ? (
                 <div>
-                  <div className="text-2xl font-bold">{latestLog.moodScore}/10</div>
+                  <div className="text-2xl font-bold">
+                    {latestLog.moodScore}/10
+                  </div>
                   <p className="text-xs text-muted-foreground capitalize">
                     {latestLog.emotionTag}
                   </p>
@@ -87,7 +104,9 @@ export default function Dashboard() {
               ) : (
                 <div>
                   <div className="text-2xl font-bold">-</div>
-                  <p className="text-xs text-muted-foreground">No mood logged today</p>
+                  <p className="text-xs text-muted-foreground">
+                    No mood logged today
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -97,7 +116,9 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recommendations</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Recommendations
+              </CardTitle>
               <Sparkles className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -106,14 +127,19 @@ export default function Dashboard() {
               ) : recommendations?.data?.recommendation ? (
                 <div>
                   <div className="text-2xl font-bold">
-                    {recommendations.data.recommendation.suggestedActivities?.length || 0}
+                    {recommendations.data.recommendation.suggestedActivities
+                      ?.length || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Activities suggested</p>
+                  <p className="text-xs text-muted-foreground">
+                    Activities suggested
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold">-</div>
-                  <p className="text-xs text-muted-foreground">No recommendations yet</p>
+                  <p className="text-xs text-muted-foreground">
+                    No recommendations yet
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -134,12 +160,16 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold">
                     {formatDate(latestLog.date)}
                   </div>
-                  <p className="text-xs text-muted-foreground">Most recent entry</p>
+                  <p className="text-xs text-muted-foreground">
+                    Most recent entry
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold">-</div>
-                  <p className="text-xs text-muted-foreground">No entries yet</p>
+                  <p className="text-xs text-muted-foreground">
+                    No entries yet
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -149,7 +179,9 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Wellness Score</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Wellness Score
+              </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -158,14 +190,22 @@ export default function Dashboard() {
               ) : latestLog ? (
                 <div>
                   <div className="text-2xl font-bold">
-                    {latestLog.moodScore >= 7 ? "Great" : latestLog.moodScore >= 5 ? "Good" : "Needs Care"}
+                    {latestLog.moodScore >= 7
+                      ? "Great"
+                      : latestLog.moodScore >= 5
+                        ? "Good"
+                        : "Needs Care"}
                   </div>
-                  <p className="text-xs text-muted-foreground">Based on recent mood</p>
+                  <p className="text-xs text-muted-foreground">
+                    Based on recent mood
+                  </p>
                 </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold">-</div>
-                  <p className="text-xs text-muted-foreground">Start tracking to see</p>
+                  <p className="text-xs text-muted-foreground">
+                    Start tracking to see
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -230,17 +270,19 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {recommendations.data.recommendation.suggestedActivities?.map((activity, index) => (
-                  <motion.span
-                    key={activity}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary capitalize"
-                  >
-                    {activity}
-                  </motion.span>
-                ))}
+                {recommendations.data.recommendation.suggestedActivities?.map(
+                  (activity, index) => (
+                    <motion.span
+                      key={activity}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary capitalize"
+                    >
+                      {activity}
+                    </motion.span>
+                  ),
+                )}
               </div>
               <Button asChild variant="outline" className="mt-4">
                 <Link to="/recommendations">
@@ -252,6 +294,5 @@ export default function Dashboard() {
         </motion.div>
       )}
     </div>
-  )
+  );
 }
-

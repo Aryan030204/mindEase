@@ -1,19 +1,34 @@
-import { useState } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { moodAPI } from "@/lib/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Label } from "@/components/ui/Label"
-import { Textarea } from "@/components/ui/Textarea"
-import { Select } from "@/components/ui/Select"
-import { motion } from "framer-motion"
-import toast from "react-hot-toast"
-import { Heart, CheckCircle2 } from "lucide-react"
-import LoadingSpinner from "@/components/ui/LoadingSpinner"
-import { formatDate } from "@/lib/utils"
-import BackButton from "@/components/ui/BackButton"
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { moodAPI } from "@/lib/api";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Label } from "@/components/ui/Label";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { Heart, CheckCircle2 } from "lucide-react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { formatDate } from "@/lib/utils";
+import BackButton from "@/components/ui/BackButton";
 
-const EMOTIONS = ["happy", "sad", "anxious", "calm", "angry", "excited", "tired", "neutral"]
+const EMOTIONS = [
+  "happy",
+  "sad",
+  "anxious",
+  "calm",
+  "angry",
+  "excited",
+  "tired",
+  "neutral",
+];
 const MOOD_COLORS = {
   1: "bg-red-500",
   2: "bg-orange-500",
@@ -25,59 +40,61 @@ const MOOD_COLORS = {
   8: "bg-green-500",
   9: "bg-emerald-500",
   10: "bg-emerald-600",
-}
+};
 
 export default function MoodTracker() {
-  const [moodScore, setMoodScore] = useState(5)
-  const [emotionTag, setEmotionTag] = useState("neutral")
-  const [notes, setNotes] = useState("")
-  const [activityDone, setActivityDone] = useState(false)
+  const [moodScore, setMoodScore] = useState(5);
+  const [emotionTag, setEmotionTag] = useState("neutral");
+  const [notes, setNotes] = useState("");
+  const [activityDone, setActivityDone] = useState(false);
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { data: todayMood, isLoading } = useQuery({
     queryKey: ["moodHistory"],
     queryFn: () => moodAPI.getHistory({ limit: 1 }),
-  })
+  });
 
   const todayLog = todayMood?.data?.logs?.find(
-    (log) => new Date(log.date).toDateString() === new Date().toDateString()
-  )
+    (log) => new Date(log.date).toDateString() === new Date().toDateString(),
+  );
 
   const mutation = useMutation({
     mutationFn: (data) => moodAPI.addLog(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["moodHistory"] })
-      queryClient.invalidateQueries({ queryKey: ["moodAnalytics"] })
-      toast.success(todayLog ? "Mood updated successfully!" : "Mood logged successfully!")
+      queryClient.invalidateQueries({ queryKey: ["moodHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["moodAnalytics"] });
+      toast.success(
+        todayLog ? "Mood updated successfully!" : "Mood logged successfully!",
+      );
       if (!todayLog) {
-        setMoodScore(5)
-        setEmotionTag("neutral")
-        setNotes("")
-        setActivityDone(false)
+        setMoodScore(5);
+        setEmotionTag("neutral");
+        setNotes("");
+        setActivityDone(false);
       }
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to log mood")
+      toast.error(error.response?.data?.message || "Failed to log mood");
     },
-  })
+  });
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     mutation.mutate({
       moodScore,
       emotionTag,
       notes,
       activityDone,
-    })
-  }
+    });
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <LoadingSpinner size="lg" />
       </div>
-    )
+    );
   }
 
   return (
@@ -191,7 +208,11 @@ export default function MoodTracker() {
                   </Label>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={mutation.isPending}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={mutation.isPending}
+                >
                   {mutation.isPending ? (
                     <>
                       <LoadingSpinner size="sm" className="mr-2" />
@@ -227,7 +248,9 @@ export default function MoodTracker() {
               <CardContent className="space-y-4">
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">{todayLog.moodScore}</span>
+                    <span className="text-4xl font-bold">
+                      {todayLog.moodScore}
+                    </span>
                     <span className="text-muted-foreground">/10</span>
                   </div>
                   <div className="mt-2 flex gap-1">
@@ -235,7 +258,9 @@ export default function MoodTracker() {
                       <div
                         key={num}
                         className={`flex-1 h-3 rounded ${
-                          todayLog.moodScore >= num ? MOOD_COLORS[num] : "bg-muted"
+                          todayLog.moodScore >= num
+                            ? MOOD_COLORS[num]
+                            : "bg-muted"
                         }`}
                       />
                     ))}
@@ -243,7 +268,9 @@ export default function MoodTracker() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Emotion</p>
-                  <p className="text-lg font-semibold capitalize">{todayLog.emotionTag}</p>
+                  <p className="text-lg font-semibold capitalize">
+                    {todayLog.emotionTag}
+                  </p>
                 </div>
                 {todayLog.notes && (
                   <div>
@@ -263,6 +290,5 @@ export default function MoodTracker() {
         )}
       </div>
     </div>
-  )
+  );
 }
-

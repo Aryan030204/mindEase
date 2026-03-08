@@ -35,7 +35,13 @@ export const getPersonalizedRecommendations = asyncHandler(async (req, res) => {
 // Fetch General Wellness Recommendations
 // -----------------------------------------------------
 export const getGeneralWellness = asyncHandler(async (req, res) => {
-  const tips = getGeneralRecommendations();
+  const userId = req.user.id;
+  const mongoose = (await import("mongoose")).default;
+  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
+    ? new mongoose.Types.ObjectId(userId)
+    : userId;
+
+  const tips = await getGeneralRecommendations(userObjectId);
 
   return res.status(200).json({
     message: "General recommendations fetched",
@@ -54,7 +60,8 @@ export const updateRecommendationStatus = asyncHandler(async (req, res) => {
   const validStatuses = ["accepted", "ignored", "completed", "pending"];
   if (!validStatuses.includes(status)) {
     return res.status(400).json({
-      message: "Invalid status. Must be one of: accepted, ignored, completed, pending",
+      message:
+        "Invalid status. Must be one of: accepted, ignored, completed, pending",
     });
   }
 

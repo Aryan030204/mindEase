@@ -1,10 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { recommendationAPI } from "@/lib/api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Badge } from "@/components/ui/Badge"
-import { motion } from "framer-motion"
-import LoadingSpinner from "@/components/ui/LoadingSpinner"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { recommendationAPI } from "@/lib/api";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { motion } from "framer-motion";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import {
   Sparkles,
   CheckCircle2,
@@ -12,77 +18,161 @@ import {
   Clock,
   RefreshCw,
   Activity,
-} from "lucide-react"
-import toast from "react-hot-toast"
-import BackButton from "@/components/ui/BackButton"
+} from "lucide-react";
+import toast from "react-hot-toast";
+import BackButton from "@/components/ui/BackButton";
+import confetti from "canvas-confetti";
 
 const ACTIVITY_LIBRARY = {
-  meditation: { icon: "🧘", title: "Guided Meditation", description: "Practice a 10-minute loving-kindness session." },
-  breathing: { icon: "🌬️", title: "Breathing Ritual", description: "Try box-breathing or the 4-7-8 technique." },
-  journaling: { icon: "📝", title: "Reflective Journaling", description: "Write freely for five minutes about your day." },
-  music: { icon: "🎵", title: "Mood Music", description: "Listen to a playlist that matches or lifts your mood." },
-  workout: { icon: "💪", title: "Movement Burst", description: "Complete a short strength or cardio circuit." },
-  walk: { icon: "🚶", title: "Mindful Walk", description: "Stroll outside and notice five calming details." },
-  yoga: { icon: "🧎", title: "Gentle Yoga", description: "Flow through a series of slow, grounding poses." },
-  stretching: { icon: "🤸", title: "Restorative Stretching", description: "Release tension with a guided stretch." },
-  nature_walk: { icon: "🌳", title: "Nature Reset", description: "Spend 15 minutes outside absorbing natural light." },
-  digital_detox: { icon: "📴", title: "Digital Detox", description: "Unplug from screens and check in with your senses." },
-  gratitude: { icon: "🙏", title: "Gratitude Pause", description: "List three things that brought you comfort today." },
-  creative: { icon: "🎨", title: "Creative Break", description: "Paint, doodle, cook, or tinker with a fun idea." },
-  social_check_in: { icon: "💬", title: "Social Check-in", description: "Connect with someone who energizes you." },
-  therapy_check_in: { icon: "🧠", title: "Therapy Touchpoint", description: "Review therapy notes or schedule a session." },
-  hydration_break: { icon: "💧", title: "Hydration Break", description: "Sip water or herbal tea and take three deep breaths." },
-  mindful_eating: { icon: "🥗", title: "Mindful Snack", description: "Enjoy a nourishing snack without multitasking." },
-}
+  meditation: {
+    icon: "🧘",
+    title: "Guided Meditation",
+    description: "Practice a 10-minute loving-kindness session.",
+  },
+  breathing: {
+    icon: "🌬️",
+    title: "Breathing Ritual",
+    description: "Try box-breathing or the 4-7-8 technique.",
+  },
+  journaling: {
+    icon: "📝",
+    title: "Reflective Journaling",
+    description: "Write freely for five minutes about your day.",
+  },
+  music: {
+    icon: "🎵",
+    title: "Mood Music",
+    description: "Listen to a playlist that matches or lifts your mood.",
+  },
+  workout: {
+    icon: "💪",
+    title: "Movement Burst",
+    description: "Complete a short strength or cardio circuit.",
+  },
+  walk: {
+    icon: "🚶",
+    title: "Mindful Walk",
+    description: "Stroll outside and notice five calming details.",
+  },
+  yoga: {
+    icon: "🧎",
+    title: "Gentle Yoga",
+    description: "Flow through a series of slow, grounding poses.",
+  },
+  stretching: {
+    icon: "🤸",
+    title: "Restorative Stretching",
+    description: "Release tension with a guided stretch.",
+  },
+  nature_walk: {
+    icon: "🌳",
+    title: "Nature Reset",
+    description: "Spend 15 minutes outside absorbing natural light.",
+  },
+  digital_detox: {
+    icon: "📴",
+    title: "Digital Detox",
+    description: "Unplug from screens and check in with your senses.",
+  },
+  gratitude: {
+    icon: "🙏",
+    title: "Gratitude Pause",
+    description: "List three things that brought you comfort today.",
+  },
+  creative: {
+    icon: "🎨",
+    title: "Creative Break",
+    description: "Paint, doodle, cook, or tinker with a fun idea.",
+  },
+  social_check_in: {
+    icon: "💬",
+    title: "Social Check-in",
+    description: "Connect with someone who energizes you.",
+  },
+  therapy_check_in: {
+    icon: "🧠",
+    title: "Therapy Touchpoint",
+    description: "Review therapy notes or schedule a session.",
+  },
+  hydration_break: {
+    icon: "💧",
+    title: "Hydration Break",
+    description: "Sip water or herbal tea and take three deep breaths.",
+  },
+  mindful_eating: {
+    icon: "🥗",
+    title: "Mindful Snack",
+    description: "Enjoy a nourishing snack without multitasking.",
+  },
+};
 
 const formatActivity = (id) => {
-  if (!id) return { title: "Wellness activity", description: "Take a mindful pause.", icon: "✨" }
-  const meta = ACTIVITY_LIBRARY[id]
-  if (meta) return meta
-  const friendly = id.replace(/_/g, " ")
-  return { title: friendly.charAt(0).toUpperCase() + friendly.slice(1), description: "A supportive activity.", icon: "✨" }
-}
+  if (!id)
+    return {
+      title: "Wellness activity",
+      description: "Take a mindful pause.",
+      icon: "✨",
+    };
+  const meta = ACTIVITY_LIBRARY[id];
+  if (meta) return meta;
+  const friendly = id.replace(/_/g, " ");
+  return {
+    title: friendly.charAt(0).toUpperCase() + friendly.slice(1),
+    description: "A supportive activity.",
+    icon: "✨",
+  };
+};
 
 export default function Recommendations() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { data: generalRecs, isLoading: generalLoading } = useQuery({
     queryKey: ["generalRecommendations"],
     queryFn: () => recommendationAPI.getGeneral(),
-  })
+  });
 
   const { data: personalizedRec, isLoading: personalizedLoading } = useQuery({
     queryKey: ["personalizedRecommendations"],
     queryFn: () => recommendationAPI.getPersonalized(),
-  })
+  });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }) => recommendationAPI.updateStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["personalizedRecommendations"] })
-      toast.success("Recommendation status updated!")
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["personalizedRecommendations"],
+      });
+      toast.success("Recommendation status updated!");
+
+      if (variables.status === "accepted" || variables.status === "completed") {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }
     },
     onError: () => {
-      toast.error("Failed to update recommendation")
+      toast.error("Failed to update recommendation");
     },
-  })
+  });
 
   const handleStatusUpdate = (id, status) => {
-    updateStatusMutation.mutate({ id, status })
-  }
+    updateStatusMutation.mutate({ id, status });
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "accepted":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "ignored":
-        return <XCircle className="h-4 w-4 text-gray-500" />
+        return <XCircle className="h-4 w-4 text-gray-500" />;
       case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-blue-500" />
+        return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
       default:
-        return <Clock className="h-4 w-4 text-yellow-500" />
+        return <Clock className="h-4 w-4 text-yellow-500" />;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -99,7 +189,8 @@ export default function Recommendations() {
           </h1>
         </div>
         <p className="text-muted-foreground">
-          Personalized activities and wellness tips to support your mental health
+          Personalized activities and wellness tips to support your mental
+          health
         </p>
       </motion.div>
 
@@ -128,7 +219,7 @@ export default function Recommendations() {
                 <div className="flex flex-wrap gap-3">
                   {personalizedRec.data.recommendation.suggestedActivities?.map(
                     (activity, index) => {
-                      const meta = formatActivity(activity)
+                      const meta = formatActivity(activity);
                       return (
                         <motion.div
                           key={`${activity}-${index}`}
@@ -148,8 +239,8 @@ export default function Recommendations() {
                             </p>
                           </div>
                         </motion.div>
-                      )
-                    }
+                      );
+                    },
                   )}
                 </div>
 
@@ -170,7 +261,7 @@ export default function Recommendations() {
                     onClick={() =>
                       handleStatusUpdate(
                         personalizedRec.data.recommendation._id,
-                        "accepted"
+                        "accepted",
                       )
                     }
                     disabled={updateStatusMutation.isPending}
@@ -184,7 +275,7 @@ export default function Recommendations() {
                     onClick={() =>
                       handleStatusUpdate(
                         personalizedRec.data.recommendation._id,
-                        "completed"
+                        "completed",
                       )
                     }
                     disabled={updateStatusMutation.isPending}
@@ -197,7 +288,7 @@ export default function Recommendations() {
                     onClick={() =>
                       handleStatusUpdate(
                         personalizedRec.data.recommendation._id,
-                        "ignored"
+                        "ignored",
                       )
                     }
                     disabled={updateStatusMutation.isPending}
@@ -263,6 +354,5 @@ export default function Recommendations() {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }
-

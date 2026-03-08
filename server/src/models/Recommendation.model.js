@@ -15,24 +15,6 @@ const recommendationSchema = new mongoose.Schema(
     },
     suggestedActivities: {
       type: [String],
-      enum: [
-        "meditation",
-        "journaling",
-        "music",
-        "workout",
-        "breathing",
-        "walk",
-        "yoga",
-        "stretching",
-        "nature_walk",
-        "digital_detox",
-        "gratitude",
-        "creative",
-        "social_check_in",
-        "therapy_check_in",
-        "hydration_break",
-        "mindful_eating",
-      ],
       default: [],
     },
     status: {
@@ -41,7 +23,7 @@ const recommendationSchema = new mongoose.Schema(
       default: "pending",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Recommendation = mongoose.model("Recommendation", recommendationSchema);

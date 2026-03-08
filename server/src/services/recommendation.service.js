@@ -1,4 +1,8 @@
 import { getActivitySuggestions } from "../ml/apiClient.js";
+import {
+  generateDynamicRecommendations,
+  generateDynamicTips,
+} from "./ai.service.js";
 import MoodLog from "../models/MoodLog.model.js";
 import Recommendation from "../models/Recommendation.model.js";
 import User from "../models/User.model.js";
@@ -48,51 +52,35 @@ export const generatePersonalizedRecommendation = async (userId) => {
     "nature_walk",
   ];
 
-  let baseSuggestions = [];
-  if (lastLog.moodScore <= 4) {
-    baseSuggestions = calmPool;
-  } else if (lastLog.moodScore <= 6) {
-    baseSuggestions = balancedPool;
-  } else {
-    baseSuggestions = energizedPool;
-  }
+  let finalSuggestions = [];
 
-  // Ask ML service for additional context-aware recommendations
-  let aiSuggestions = [];
+  // Generate dynamic recommendations using Gemini
   try {
-    const data = await getActivitySuggestions(
+    const dynamicRecs = await generateDynamicRecommendations(
       lastLog.moodScore,
       lastLog.emotionTag,
-      preferences
+      preferences,
     );
-    if (data?.suggestions && Array.isArray(data.suggestions)) {
-      aiSuggestions = data.suggestions;
+
+    if (dynamicRecs && Array.isArray(dynamicRecs) && dynamicRecs.length > 0) {
+      finalSuggestions = dynamicRecs;
     }
   } catch (err) {
-    console.error("ML recommendation error:", err.message);
+    console.error("Gemini dynamic recommendation error:", err.message);
   }
 
-  // Combine ML suggestions with fallback pool
-  const combined = [...aiSuggestions, ...baseSuggestions];
-
-  // Filter suggestions based on user preferences
-  const filteredSuggestions = combined.filter((activity) => {
-    let allowed = true;
-    if (preferenceFilters.exercise.includes(activity)) {
-      allowed = allowed && preferences.exercise;
+  // Fallback if AI fails or returns empty
+  if (finalSuggestions.length === 0) {
+    let baseSuggestions = [];
+    if (lastLog.moodScore <= 4) {
+      baseSuggestions = calmPool;
+    } else if (lastLog.moodScore <= 6) {
+      baseSuggestions = balancedPool;
+    } else {
+      baseSuggestions = energizedPool;
     }
-    if (preferenceFilters.music.includes(activity)) {
-      allowed = allowed && preferences.music;
-    }
-    if (preferenceFilters.meditation.includes(activity)) {
-      allowed = allowed && preferences.meditation;
-    }
-    return allowed;
-  });
-
-  const prioritized = Array.from(new Set(filteredSuggestions)).slice(0, 6);
-  const finalSuggestions =
-    prioritized.length > 0 ? prioritized : baseSuggestions.slice(0, 6);
+    finalSuggestions = baseSuggestions.slice(0, 6);
+  }
 
   // Check if recommendation already exists for this mood log
   let recommendation = await Recommendation.findOne({
@@ -115,8 +103,8 @@ export const generatePersonalizedRecommendation = async (userId) => {
   return recommendation;
 };
 
-export const getGeneralRecommendations = () => {
-  return [
+export const getGeneralRecommendations = async (userId) => {
+  const fallbackTips = [
     "Drink a glass of water and stretch for two minutes",
     "Take a mindful nature walk and notice five calming details",
     "Practice a 4-7-8 breathing cycle for five rounds",
@@ -128,4 +116,23 @@ export const getGeneralRecommendations = () => {
     "Disconnect from screens for 30 minutes and read something uplifting",
     "Plan a nourishing meal or snack and eat it mindfully",
   ];
+
+  try {
+    const lastLog = await MoodLog.findOne({ userId }).sort({
+      date: -1,
+      createdAt: -1,
+    });
+
+    const moodScore = lastLog ? lastLog.moodScore : null;
+    const emotionTag = lastLog ? lastLog.emotionTag : null;
+
+    const dynamicTips = await generateDynamicTips(moodScore, emotionTag);
+    if (dynamicTips && Array.isArray(dynamicTips) && dynamicTips.length > 0) {
+      return dynamicTips;
+    }
+  } catch (err) {
+    console.error("Error fetching dynamic tips:", err.message);
+  }
+
+  return fallbackTips;
 };
