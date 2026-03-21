@@ -84,4 +84,11 @@ export const resourceAPI = {
   getByCategory: (category) => api.get(`/api/resources/${category}`),
 }
 
+// Insight API
+export const insightAPI = {
+  getProfile: () => api.get("/api/insights/profile"),
+  getPatterns: () => api.get("/api/insights/patterns"),
+  getForecast: () => api.get("/api/insights/forecast"),
+}
+
 export default api

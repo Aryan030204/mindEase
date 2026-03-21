@@ -10,6 +10,7 @@ import moodRoutes from "./routes/mood.routes.js";
 import recommendationRoutes from "./routes/recommendation.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import resourceRoutes from "./routes/resource.routes.js";
+import insightRoutes from "./routes/insight.routes.js";
 
 import errorMiddleware from "./middlewares/error.middleware.js";
 
@@ -83,6 +84,7 @@ app.use("/api/mood", moodRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/insights", insightRoutes);
 
 // 404 handler
 app.use((req, res) => {

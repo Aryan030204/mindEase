@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { moodAPI } from "@/lib/api"
+import { moodAPI, insightAPI } from "@/lib/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Select } from "@/components/ui/Select"
@@ -33,6 +33,25 @@ export default function MoodAnalytics() {
     queryKey: ["moodAnalytics", period],
     queryFn: () => moodAPI.getAnalytics(period),
   })
+
+  const { data: profileData } = useQuery({
+    queryKey: ["insightProfile"],
+    queryFn: () => insightAPI.getProfile(),
+  })
+
+  const { data: patternsData } = useQuery({
+    queryKey: ["insightPatterns"],
+    queryFn: () => insightAPI.getPatterns(),
+  })
+
+  const { data: forecastData } = useQuery({
+    queryKey: ["insightForecast"],
+    queryFn: () => insightAPI.getForecast(),
+  })
+
+  const insights = profileData?.data?.insight
+  const patterns = patternsData?.data?.patterns || []
+  const forecast = forecastData?.data?.forecast
 
   const analyticsData = analytics?.data
 
@@ -134,6 +153,83 @@ export default function MoodAnalytics() {
               <p className="text-xs text-muted-foreground">needs attention</p>
             </CardContent>
           </Card>
+        </motion.div>
+      )}
+
+      {/* AI Insights & Forecasting */}
+      {(insights || patterns.length > 0 || forecast) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid gap-4 md:grid-cols-3"
+        >
+          {insights && (
+            <Card className="border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                  <TrendingUp className="h-5 w-5" />
+                  AI Emotional Profile
+                </CardTitle>
+                <CardDescription>Generated from last 14 logs</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Baseline Mood:</span>
+                  <span className="font-semibold">{insights.emotionalBaseline?.toFixed(1) || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Stress Level:</span>
+                  <span className={`font-semibold capitalize ${insights.stressLevel === 'high' ? 'text-red-500' : insights.stressLevel === 'medium' ? 'text-yellow-500' : 'text-green-500'}`}>{insights.stressLevel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Recovery Rate:</span>
+                  <span className="font-semibold capitalize">{insights.recoveryRate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Dominant Emotion:</span>
+                  <span className="font-semibold capitalize">{insights.dominantEmotion}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {patterns.length > 0 && (
+            <Card className="border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+              <CardHeader>
+                <CardTitle className="text-blue-700 dark:text-blue-400">Pattern Detection</CardTitle>
+                <CardDescription>Identified analytics behaviors</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                  {patterns.map((pattern, index) => (
+                    <li key={index}>{pattern}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {forecast && (
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-900">
+              <CardHeader>
+                <CardTitle className="text-green-700 dark:text-green-400">Mood Forecast</CardTitle>
+                <CardDescription>Algorithm linear trend projection</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center pt-4">
+                <div className="text-4xl font-black text-green-600 dark:text-green-400">
+                  {forecast.predictedMood}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Predicted Score</div>
+                <div className="mt-4 w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all" 
+                    style={{ width: `${forecast.confidence * 100}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-1">Confidence: {(forecast.confidence * 100).toFixed(0)}%</div>
+              </CardContent>
+            </Card>
+          )}
         </motion.div>
       )}
 

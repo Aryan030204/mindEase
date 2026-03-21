@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Machine Learning Service
+  mindease-ml:
+    build:
+      context: ./ML
+    container_name: mindease-ml
+    ports:
+      - "8000:8000"
+    networks:
+      - mindease-network
+    restart: always
+
+  # Backend Node.js Service
+  mindease-backend:
+    build:
+      context: ./server
+    container_name: mindease-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - AI_API_URL=http://mindease-ml:8000/predict
+      - ML_SERVER_URL=http://mindease-ml:8000
+      - CLIENT_URLS=http://localhost,http://localhost:80
+      # Provide remaining environment vars via env_file if found
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mindease-ml
+    networks:
+      - mindease-network
+    restart: always
+
+  # Frontend React Service
+  mindease-frontend:
+    build:
+      context: ./frontend
+      args:
+        # For Vite, this URL is baked in at build time.
+        # It must enable browser requests to direct path access fallback correctly.
+        - VITE_API_URL=http://localhost:8080
+    container_name: mindease-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - mindease-backend
+    networks:
+      - mindease-network
+    restart: always
+
+networks:
+  mindease-network:
+    driver: bridge

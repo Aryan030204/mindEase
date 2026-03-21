@@ -58,9 +58,7 @@ export default function Navbar({ onMenuClick }) {
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <span className="text-lg font-bold">M</span>
-              </div>
+              <img src="/logo.jpg" alt="MindEase" className="h-8 w-auto mix-blend-multiply dark:mix-blend-normal" />
               <span className="hidden text-xl font-bold sm:inline-block">
                 MindEase
               </span>
