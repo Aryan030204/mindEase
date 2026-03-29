@@ -49,6 +49,8 @@ export const authAPI = {
   signup: (data) => api.post("/api/auth/signup", data),
   login: (data) => api.post("/api/auth/login", data),
   logout: () => api.post("/api/auth/logout"),
+  requestPasswordResetCode: (data) => api.post("/api/auth/forgot-password/send-code", data),
+  resetPasswordWithCode: (data) => api.post("/api/auth/forgot-password/reset", data),
 }
 
 // User API

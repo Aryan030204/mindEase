@@ -68,7 +68,7 @@ export default function Navbar({ onMenuClick }) {
 
         {/* Desktop Navigation */}
         <div className="hidden flex-1 justify-center lg:flex">
-          <div className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-1 shadow-inner shadow-primary/10">
+          <div className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-1 shadow-inner shadow-primary/10 backdrop-blur">
             {NAV_LINKS.map((link) => {
               const Icon = link.icon
               const isActive = location.pathname.startsWith(link.to)
@@ -77,10 +77,10 @@ export default function Navbar({ onMenuClick }) {
                   key={link.to}
                   to={link.to}
                   className={cn(
-                    "flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                    "relative flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-gradient-to-r from-primary to-sky-500 text-white shadow-lg"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-gradient-to-r from-primary to-sky-500 text-white shadow-lg shadow-primary/30"
+                      : "text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -107,8 +107,12 @@ export default function Navbar({ onMenuClick }) {
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-10 w-10 overflow-hidden rounded-full p-0 ring-2 ring-primary/20 hover:ring-primary/40"
+                >
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-primary to-sky-500 text-primary-foreground shadow-lg shadow-primary/30">
                     {getInitials(user.firstName, user.lastName)}
                   </div>
                 </Button>

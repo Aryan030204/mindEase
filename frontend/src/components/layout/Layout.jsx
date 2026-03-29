@@ -13,6 +13,7 @@ export default function Layout() {
       <div className="pointer-events-none fixed inset-0 z-0 opacity-60 blur-3xl">
         <div className="absolute left-1/3 top-0 h-72 w-72 rounded-full bg-primary/20" />
         <div className="absolute bottom-10 right-10 h-64 w-64 rounded-full bg-sky-400/20 dark:bg-sky-500/10" />
+        <div className="absolute left-10 top-1/2 h-56 w-56 rounded-full bg-fuchsia-300/20 dark:bg-fuchsia-500/10" />
       </div>
 
       <div className="relative z-10">
@@ -44,7 +45,7 @@ export default function Layout() {
         {/* Main Content */}
         <div className="lg:pl-64">
           <main className="p-4 md:p-6 lg:p-8">
-            <div className="rounded-3xl border border-white/40 bg-white/80 p-4 shadow-xl shadow-primary/5 backdrop-blur dark:border-white/10 dark:bg-slate-900/80">
+            <div className="rounded-3xl border border-white/40 bg-white/85 p-4 shadow-2xl shadow-primary/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 md:p-5">
               <Outlet />
             </div>
           </main>

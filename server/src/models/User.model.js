@@ -32,6 +32,18 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+    passwordResetOtpHash: {
+      type: String,
+      select: false,
+    },
+    passwordResetOtpExpiresAt: {
+      type: Date,
+      select: false,
+    },
+    passwordResetOtpAvailableAt: {
+      type: Date,
+      select: false,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],

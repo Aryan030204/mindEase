@@ -12,6 +12,18 @@ export const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
+export const forgotPasswordRequestSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+export const forgotPasswordResetSchema = Joi.object({
+  email: Joi.string().email().required(),
+  otp: Joi.string()
+    .pattern(/^\d{6}$/)
+    .required(),
+  newPassword: Joi.string().min(8).required(),
+});
+
 export const moodLogSchema = Joi.object({
   moodScore: Joi.number().min(1).max(10).required(),
   emotionTag: Joi.string()
