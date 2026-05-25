@@ -1,160 +1,447 @@
-# MindEase - Full Project Documentation
+# MindEase Documentation
 
-MindEase is a mental wellness platform designed to help users track their mood, receive personalized recommendations for wellness activities, and converse with an AI chatbot for mental health support.
+MindEase is a production-style mental wellness platform with three implemented intelligence layers:
 
----
+1. User understanding and adaptive onboarding
+2. Runtime personalization and emotional adaptation
+3. Privacy-safe collective learning and recommendation evolution
 
-## 🏗️ System Architecture
+The stack is a monolithic full-stack system with:
 
-The application is built using a microservices-inspired monolithic architecture with separate backend servers for application logic, Machine Learning tasks, and AI integrations (Google Gemini).
+- `frontend/` React + Vite + TailwindCSS client
+- `server/` Node.js + Express + MongoDB + Redis API and intelligence layer
+- `ML/` Python FastAPI helper service for lightweight sentiment support
+
+## Architecture
 
 ```mermaid
 graph TD
-    A[Frontend React App] -->|HTTPS| B[Backend Node.js Server]
-    B -->|HTTPS| C[ML Server Python]
-    B -->|HTTPS| F[Google Gemini AI]
-    B -->|Database| D[MongoDB Atlas]
-    C -->|Internal| E[Sentiment & Recommendation Models]
-    F -->|Chat & Suggestions| B
+    A[React Frontend] -->|HTTPS| B[Node/Express API]
+    B -->|MongoDB| C[(MongoDB Atlas)]
+    B -->|Redis TTL Cache| D[(Redis)]
+    B -->|HTTP| E[Python FastAPI ML Service]
+    B -->|API| F[Google Gemini]
+    B --> G[Adaptive Personalization Engine]
+    B --> H[Collective Learning Engine]
+    H --> G
 ```
 
-### Tech Stack
-*   **Frontend**: React (Vite), Tailwind CSS, Framer Motion (Animations), Recharts (Analytics).
-*   **Backend Application Server**: Node.js, Express, Mongoose (MongoDB ODM), JWT Authentication.
-*   **Machine Learning Server**: Python, FastAPI, Scikit-learn (Sentiment & Regression).
-*   **AI Engine**: Google Gemini 2.5 Flash (Chat & Dynamic Recommendations), Gemini 1.5 Flash (Rephrasing).
-*   **Database**: MongoDB Atlas.
+## Core Product Modules
 
----
+### Task 1: User Understanding Foundation
 
-## 🛠️ Backend Services (`server`)
+Purpose:
+- Adaptive onboarding
+- Trait extraction
+- User profiling
 
-The backend server manages user profiles, logs mood entries, serves resources, and integrates with the ML server to provide predictions and personalized suggestions.
+Implemented with:
+- `OnboardingQuestion`
+- `OnboardingResponse`
+- `UserTrait`
+- adaptive question selection and trait effect application
 
-### Directory Structure
+Main backend services:
+- [adaptiveQuestion.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/adaptiveQuestion.service.js>)
+- [traitEngine.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/traitEngine.service.js>)
+- [onboarding.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/onboarding.service.js>)
+
+### Task 2: Adaptive Personalization System
+
+Purpose:
+- Mood logging
+- Deterministic recommendations
+- Pattern detection
+- Forecasting
+- Context-aware chatbot support
+
+Implemented with:
+- `MoodLog`
+- `Recommendation`
+- `RecommendationEffectiveness`
+- `UserPattern`
+- `UserInsight`
+- Redis runtime memory
+
+Main backend services:
+- [recommendationEngine.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/recommendationEngine.service.js>)
+- [patternDetection.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/patternDetection.service.js>)
+- [forecasting.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/forecasting.service.js>)
+- [chatContext.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/chatContext.service.js>)
+- [ai.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/ai.service.js>)
+
+### Task 3: Collective Learning & Evolution
+
+Purpose:
+- Learn from anonymized outcomes across users
+- Improve recommendation ranking globally
+- Improve chatbot tone strategy indirectly
+- Aggregate emotional-behavioral correlations
+
+Implemented with:
+- `CollectiveInsight`
+- `PersonalityCluster`
+- `RecommendationGlobalWeight`
+- `EmotionalTrendAnalytics`
+
+Main backend services:
+- [collectiveAggregation.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/collectiveAggregation.service.js>)
+- [collectiveLearning.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/collectiveLearning.service.js>)
+- [clustering.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/clustering.service.js>)
+- [recommendationOptimization.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/recommendationOptimization.service.js>)
+- [collectiveJobs.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/collectiveJobs.service.js>)
+
+## Repository Structure
+
 ```text
-server/
-├── src/
-│   ├── config/          # DB connection, Environment variables
-│   ├── controllers/     # Route handlers (auth, chat, insight, mood, recommendations, resources)
-│   ├── middlewares/     # Guardrails, Auth checks, error handling
-│   ├── models/          # MongoDB Mongoose schemas (User, MoodLog, UserInsight, etc.)
-│   ├── routes/          # Express route definitions
-│   ├── services/        # Logic for AI (Gemini), Insights (Forecasting), JWT, Passwords
-│   └── app.js           # Express app setup
-└── API_ENDPOINTS_REFERENCE.md # Detailed API Documentation
+app/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── features/
+│   │   │   ├── adaptive/
+│   │   │   └── onboarding/
+│   │   ├── lib/
+│   │   ├── pages/
+│   │   └── store/
+├── server/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── data/
+│   │   ├── middlewares/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── scripts/
+│   │   ├── services/
+│   │   └── utils/
+├── ML/
+└── DOCUMENTATION.md
 ```
 
-### 📊 Advanced Insight Service
-The `insight` service processes raw mood data to generate deep psychological markers:
-*   **Emotional Baseline**: Calculated using the last 14 logs to establish a rolling average mood score.
-*   **Stress Level Assessment**: Dynamic classification (Low/Medium/High) based on baseline deviations.
-*   **Recovery Rate Tracking**: Measures the efficiency of mood recovery after logged negative shifts.
-*   **Mood Forecasting**: Employs linear regression on 7-day windows to predict next-day mood with a confidence (R²) score.
-*   **Pattern Detection**: Identifies temporal correlations (e.g., "Monday Slumps") and activity-driven improvements.
+## Backend Overview
 
-### Core Data Models
-*   **User**: `firstName`, `lastName`, `email`, `password` (hashed), `role`, `preferences` (wellness activities toggle).
-*   **MoodLog**: `userId`, `date`, `moodScore` (1-10), `emotionTag`, `notes`, `activityDone`.
-*   **Recommendation**: `userId`, `moodLogId`, `suggestedActivities`, `status` (`pending`, `accepted`).
-*   **Resource**: `title`, `category` (articles, meditation, journaling, etc.), `contentURL`, `description`.
-*   **Conversation**: `userId`, `messages` (array of `sender` and `text` for bot/user chat).
+### Framework and Standards
 
----
+- Node.js with ES modules only
+- Express 5
+- MongoDB via Mongoose
+- Redis for runtime cache and job locking
+- Joi validation
+- centralized error handling
+- `asyncHandler` for async route wrapping
 
-## 🖥️ Frontend Interface (`frontend`)
+### Key Middleware
 
-The frontend is a responsive React application built with Vite and styled using Tailwind CSS. It features dynamic analytics and interactive components.
+- [auth.middleware.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/middlewares/auth.middleware.js>)
+- [validation.middleware.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/middlewares/validation.middleware.js>)
+- [role.middleware.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/middlewares/role.middleware.js>)
+- [rateLimit.middleware.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/middlewares/rateLimit.middleware.js>)
+- [error.middleware.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/middlewares/error.middleware.js>)
 
-### Pages & Navigation
-1.  **Dashboard**: Overview of user's today status, latest mood, Quick links.
-2.  **Mood Tracker**: Log daily mood entries along with notes and activity done status.
-3.  **Mood Analytics**: Visual charts (weekly/daily trends, emotion distribution).
-4.  **Recommendations**: Displays personalized tips or list of recommended activities based on latest logs.
-5.  **Chat**: Interface to interact with an AI model for mental support.
-6.  **Resources**: Educational resources and guides for mental health grouped by categories.
-7.  **Profile**: Manage setup details, preferences, and account updates.
+### MongoDB Models
 
-### State Management & Contexts
-*   **AuthContext**: Manages login/logout states, stores auth token, fetches profile details.
-*   **ThemeContext**: Light/Dark theme toggling for premium visuals.
+User and onboarding:
+- `User`
+- `UserTrait`
+- `OnboardingQuestion`
+- `OnboardingResponse`
 
----
+Mood and adaptive runtime:
+- `MoodLog`
+- `Recommendation`
+- `RecommendationEffectiveness`
+- `UserPattern`
+- `UserInsight`
+- `Conversation`
+- `Resource`
 
-## 🧠 Machine Learning Module (`ML`)
+Collective learning:
+- `CollectiveInsight`
+- `PersonalityCluster`
+- `RecommendationGlobalWeight`
+- `EmotionalTrendAnalytics`
 
-The ML module is powered by a FastAPI Python server that delivers intelligence to the application through sentiment analysis and recommendation matching.
+### Redis Usage
 
-### Endpoints
-*   `POST /predict`: Evaluates input text and computes a sentiment score (`moodScore`) paired with sentiment classification.
-*   `POST /recommend`: Suggests target wellness activities (e.g., `breathing`, `meditation`, `music`) tailored to response tag and previous score weightings.
+Redis is temporary only.
 
-### Model Mechanics
-*   Uses trained templates for processing NLP inputs to compute daily vibe scores correctly from notes.
-*   Maps score output triggers to preset response buffers to select ideal interventions.
+Current uses:
+- active chat context
+- recent emotional state
+- recommendation cache
+- collective aggregation cache
+- collective summary cache
+- recommendation global weight cache
+- cron job locks
 
----
+Main implementation:
+- [redis.service.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/services/redis.service.js>)
 
-## 💡 Key Features of MindEase
+### Recommendation System
 
-| Feature | Description |
-| :--- | :--- |
-| **Mood Log Tracking** | Log mood scores, attachment tag descriptions, and brief notes to keep a historic timeline of mental health vibes. |
-| **Intelligent Analytics** | Deep-dive analytics with trend charts, emotion heatmaps, and weekly progress comparisons. |
-| **Hybrid Recommendations** | A dual-layer system using deterministic ML for activity selection and Gemini AI for empathetic rephrasing. |
-| **Cultural Tailoring** | Suggestions are specifically curated for the Indian lifestyle (e.g., evening terrace walks, ragas, masala chai rhythm). |
-| **AI Support Bot** | A safe, non-judgmental space powered by Gemini 2.5 Flash, strictly guardrailed for mental health support. |
-| **Mood Forecasting** | Predicts your future mood trends using statistical regression to help you prepare for "low" days. |
-| **Content Library** | A curated central source of educational interventions (articles, meditations) filtered for rapid relief. |
+Recommendation selection is deterministic-first.
 
----
+Inputs:
+- user traits
+- recent mood logs
+- user-specific effectiveness history
+- detected patterns
+- forecast output
+- time-of-day context
+- collective global recommendation modifiers
 
-## 🛡️ AI Principles & Implementation
+Dataset:
+- [recommendationDataset.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/data/recommendationDataset.js>)
 
-MindEase integrates advanced Generative AI with a focus on safety, empathy, and cultural relevance.
+Gemini is not used to decide activities. Gemini is used only to:
+- personalize phrasing of already selected recommendations
+- generate chatbot replies from structured context
 
-### 1. Mental Health Guardrails
-The AI Chatbot (`ai.service.js`) is protected by strict system instructions to:
-*   **Topic Restriction**: Only respond to mental health, emotions, and well-being. Other topics (politics, sport, etc.) are politely redirected.
-*   **Empathy Focus**: Uses non-judgmental, warm language to validate user feelings without replacing professional therapy.
-*   **Diagnosis Avoidance**: Specifically designed NOT to provide medical diagnoses or medication advice.
+### Pattern Detection
 
-### 2. Cultural Personalization (Indian Context)
-Unlike generic wellness apps, MindEase AI is prompted to provide recommendations deeply rooted in Indian culture:
-*   **Lifestyle**: Activities involving masala chai, terrace walks, and family interaction.
-*   **Spirituality & Wellness**: References to Yoga (Anulom Vilom), Ragas (Sitar/Flute music), and Traditional practices (Tulsi water).
-*   **Hybrid Architecture**: A deterministic model selects the *type* of activity, while Gemini AI rephrases the *suggestion* to match the user's current mood and intensity level.
+Implemented patterns include:
+- monday stress
+- sleep-related mood decline
+- social isolation pattern
+- night anxiety
+- recommendation effectiveness trends
 
-### 3. Model Utilization
-*   **Primary**: `gemini-2.5-flash` for high-speed, empathetic chat and recommendation generation.
-*   **Secondary**: `gemini-1.5-flash` for high-precision JSON formatting and content rephrasing tasks.
+### Forecasting
 
----
+Forecasting is lightweight and deterministic:
+- weighted average of recent moods
+- recent trend adjustment
+- sleep and stress adjustment
+- pattern-based adjustment
 
-## 🚀 Setup & Installation
+### Collective Learning
 
-For detailed instructions, refer to the respective module directories:
+Collective learning processes anonymized metadata only.
 
-### Backend (`server`)
-1. `cd server`
-2. `npm install`
-3. Configure `.env` with `MONGO_URI`, `JWT_SECRET`, etc.
-4. `npm run dev` or `npm start`
+It does not retain:
+- user identities
+- emails
+- raw private chat content
+- direct personal memory across users
 
-### Frontend (`frontend`)
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
-4. Refer to `FRONTEND_SETUP.md` for visual guides.
+It does retain:
+- cluster-level intervention success
+- pattern-level trend summaries
+- global activity weights
+- tone strategy metadata
 
-### Containerization (Docker)
-The entire stack is containerized for seamless deployment:
-1.  **Orchestration**: `docker-compose.yml` manages three primary services: `mindease-ml` (8000), `mindease-backend` (8080), and `mindease-frontend` (80).
-2.  **Networking**: Services communicate over a dedicated bridge network (`mindease-network`).
-3.  **Deployment**: Run `docker-compose up --build` to launch the full application locally or in production.
+### Scheduled Jobs
 
-### Machine Learning (`ML`)
-1. `cd ML`
-2. Create and activate a Python virtual environment.
-3. `pip install -r requirements.txt`
-4. Run scripts or model deployment tasks.
+Implemented with `node-cron`.
+
+Jobs:
+- nightly collective analysis
+- cluster recalculation
+- recommendation optimization refresh
+- emotional trend aggregation
+
+Entry point:
+- [server.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/server.js>)
+
+## API Surface
+
+Mounted route groups:
+
+- `/api/auth`
+- `/api/user`
+- `/api/mood`
+- `/api/recommendations`
+- `/api/chat`
+- `/api/resources`
+- `/api/insights`
+- `/api/patterns`
+- `/api/onboarding`
+
+Detailed reference:
+- [API_ENDPOINTS_REFERENCE.md](</e:/FULL STACK/sem7/Final year Project/app/server/API_ENDPOINTS_REFERENCE.md>)
+
+## Frontend Overview
+
+### Stack
+
+- React 18
+- Vite
+- TailwindCSS
+- Redux Toolkit
+- React Router
+- React Query
+- Framer Motion
+- Recharts
+
+### State
+
+Auth:
+- `AuthContext`
+
+Theme:
+- `ThemeContext`
+
+Redux slices:
+- onboarding slice
+- adaptive slice
+
+Adaptive frontend state includes:
+- current emotional state
+- recommendations
+- recommendation history
+- patterns
+- forecast
+- chatbot context
+- collective summary cards
+
+### Main Pages
+
+- `Login`
+- `Signup`
+- `Dashboard`
+- `MoodTracker`
+- `MoodAnalytics`
+- `Recommendations`
+- `Chat`
+- `Resources`
+- `Profile`
+- onboarding flow pages
+
+### Frontend Intelligence Surfaces
+
+Task 2 surfaces:
+- adaptive dashboard cards
+- recommendation cards with feedback actions
+- chatbot context-based conversation
+- emotional insights charts and pattern cards
+
+Task 3 surfaces:
+- collective insight cards
+- behavioral trend summaries
+- recommendation evolution indicators
+
+These are privacy-safe summaries only.
+
+## ML Service Overview
+
+The `ML/` service remains a lightweight auxiliary service.
+
+It is not the primary recommendation engine.
+
+Current role:
+- lightweight text sentiment support
+
+Primary code:
+- [main.py](</e:/FULL STACK/sem7/Final year Project/app/ML/app/main.py>)
+- [ml_service.py](</e:/FULL STACK/sem7/Final year Project/app/ML/app/services/ml_service.py>)
+
+## Environment Variables
+
+### Backend
+
+Important backend variables used by the codebase:
+
+- `PORT`
+- `NODE_ENV`
+- `MONGO_URI`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `CLIENT_URL` or `CLIENT_URLS`
+- `REDIS_URL`
+- `ML_SERVER_URL`
+- `RECOMMENDATIONS_API_KEY`
+- `GMAIL_ID`
+- `GMAIL_PASSWORD`
+- `ADAPTIVE_QUESTION_COUNT`
+- `ONBOARDING_VERSION`
+- `CHAT_RATE_LIMIT_WINDOW_SECONDS`
+- `CHAT_RATE_LIMIT_MAX`
+- `DISABLE_COLLECTIVE_JOBS`
+
+Note:
+- The code expects `RECOMMENDATIONS_API_KEY` for Gemini-backed personalization and chat generation.
+
+### Frontend
+
+- `VITE_API_URL`
+
+## Demo and Seed Utilities
+
+Current utility scripts include:
+
+- [seed.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/seed.js>)
+- [createRajDemoUser.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/scripts/createRajDemoUser.js>)
+
+`createRajDemoUser.js` creates a demo user with:
+- onboarding completed
+- 60 days of usage history
+- varied mood logs
+- completed recommendations
+- resources
+
+## Security Notes
+
+- JWT-protected routes for private features
+- role checks for admin operations
+- Joi validation on write endpoints
+- note sanitization before persistence
+- chat rate limiting
+- centralized error responses
+- collective learning uses abstract behavioral metadata only
+
+## Deployment
+
+### Local Development
+
+Backend:
+```bash
+cd server
+npm install
+npm run dev
+```
+
+Frontend:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+ML service:
+```bash
+cd ML
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+### Docker
+
+Docker support exists via:
+- [docker-compose.yml](</e:/FULL STACK/sem7/Final year Project/app/docker-compose.yml>)
+- frontend Dockerfile
+- server Dockerfile
+- ML Dockerfile
+
+## Verification Status
+
+Recently verified in this codebase:
+- backend module imports
+- collective services imports
+- frontend production build
+
+Runtime items still dependent on environment:
+- live MongoDB
+- live Redis
+- Gemini API access
+- ML service availability
+
+## Documentation Map
+
+Use these files together:
+
+- [DOCUMENTATION.md](</e:/FULL STACK/sem7/Final year Project/app/DOCUMENTATION.md>) for system overview
+- [API_ENDPOINTS_REFERENCE.md](</e:/FULL STACK/sem7/Final year Project/app/server/API_ENDPOINTS_REFERENCE.md>) for backend routes
+- [frontend/README.md](</e:/FULL STACK/sem7/Final year Project/app/frontend/README.md>) for frontend overview
+- [frontend/FRONTEND_SETUP.md](</e:/FULL STACK/sem7/Final year Project/app/frontend/FRONTEND_SETUP.md>) for frontend setup

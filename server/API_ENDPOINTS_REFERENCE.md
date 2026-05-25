@@ -1,39 +1,33 @@
 # MindEase API Endpoints Reference
 
-Complete reference for all API endpoints with example requests and responses.
+This file reflects the current Express API mounted from [app.js](</e:/FULL STACK/sem7/Final year Project/app/server/src/app.js>).
 
-## Base URLs
+Base path:
+- local: `http://localhost:8080`
+- production: depends on deployment
 
-- **Node Server**: https://mindease-node-server.onrender.com
-- **ML Server**: https://mindease-ml-server.onrender.com
+Protected endpoints require:
 
-## Authentication
-
-All protected endpoints require JWT token in Authorization header:
-```
-Authorization: Bearer <your-jwt-token>
+```http
+Authorization: Bearer <jwt-token>
 ```
 
----
-
-## Health & Info
+## Health
 
 ### GET /health
-Health check endpoint.
 
-**Response**:
+Response:
 ```json
 {
   "status": "ok",
   "message": "MindEase API is running",
-  "timestamp": "2024-11-24T06:30:00.000Z"
+  "timestamp": "2026-05-25T10:00:00.000Z"
 }
 ```
 
 ### GET /api
-API information endpoint.
 
-**Response**:
+Response:
 ```json
 {
   "name": "MindEase API",
@@ -44,558 +38,401 @@ API information endpoint.
     "mood": "/api/mood",
     "recommendations": "/api/recommendations",
     "chat": "/api/chat",
-    "resources": "/api/resources"
+    "resources": "/api/resources",
+    "patterns": "/api/patterns"
   }
 }
 ```
 
----
-
-## Authentication Endpoints
+## Auth
 
 ### POST /api/auth/signup
-Create a new user account.
 
-**Request Body**:
+Body:
 ```json
 {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "password": "securepass123"
+  "firstName": "Raj",
+  "lastName": "Sharma",
+  "email": "raj@example.com",
+  "password": "Raj@123456"
 }
 ```
 
-**Response** (201):
+Response:
 ```json
 {
   "message": "Signup successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "jwt-token",
   "user": {
-    "id": "507f1f77bcf86cd799439011",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
+    "id": "user-id",
+    "firstName": "Raj",
+    "lastName": "Sharma",
+    "email": "raj@example.com",
     "role": "user"
   }
 }
 ```
 
 ### POST /api/auth/login
-Authenticate user and get JWT token.
 
-**Request Body**:
+Body:
 ```json
 {
-  "email": "john@example.com",
-  "password": "securepass123"
-}
-```
-
-**Response** (200):
-```json
-{
-  "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "507f1f77bcf86cd799439011",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
-    "role": "user"
-  }
+  "email": "raj@example.com",
+  "password": "Raj@123456"
 }
 ```
 
 ### POST /api/auth/logout
-Logout user (client should delete token).
 
-**Response** (200):
+### POST /api/auth/forgot-password/send-code
+
+Body:
 ```json
 {
-  "message": "Logged out successfully"
+  "email": "raj@example.com"
 }
 ```
 
----
+### POST /api/auth/forgot-password/reset
 
-## User Profile Endpoints
+Body:
+```json
+{
+  "email": "raj@example.com",
+  "otp": "123456",
+  "newPassword": "Raj@654321"
+}
+```
+
+## User
 
 ### GET /api/user/profile
-Get current user's profile.
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Response** (200):
-```json
-{
-  "user": {
-    "_id": "507f1f77bcf86cd799439011",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
-    "role": "user",
-    "preferences": {
-      "exercise": true,
-      "music": true,
-      "meditation": true
-    },
-    "createdAt": "2024-11-24T06:00:00.000Z",
-    "updatedAt": "2024-11-24T06:00:00.000Z"
-  }
-}
-```
+Returns current profile and preferences.
 
 ### PUT /api/user/profile
-Update user profile.
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body**:
+Body supports partial update:
 ```json
 {
-  "firstName": "Updated",
+  "firstName": "Raj",
+  "lastName": "S",
   "preferences": {
     "exercise": true,
-    "music": false,
-    "meditation": true
+    "music": true,
+    "meditation": false
   }
-}
-```
-
-**Response** (200):
-```json
-{
-  "message": "Profile updated successfully",
-  "user": { ... }
 }
 ```
 
 ### DELETE /api/user/profile
-Delete user account.
 
-**Headers**: `Authorization: Bearer <token>`
+Deletes the authenticated user account.
 
-**Response** (200):
+## Onboarding
+
+### GET /api/onboarding/start
+
+Starts or resumes onboarding.
+
+### POST /api/onboarding/answer
+
+Body:
 ```json
 {
-  "message": "Account deleted successfully"
+  "questionId": "question-id",
+  "selectedOptionId": "option-id"
 }
 ```
 
----
+### GET /api/onboarding/next
 
-## Mood Logging Endpoints
+Returns next adaptive question.
+
+### POST /api/onboarding/complete
+
+Body:
+```json
+{
+  "confirm": true
+}
+```
+
+### GET /api/onboarding/profile
+
+Returns onboarding / trait profile.
+
+### GET /api/onboarding/questions
+
+Admin only.
+
+### POST /api/onboarding/questions
+
+Admin only. Creates onboarding question.
+
+### PUT /api/onboarding/questions/:id
+
+Admin only. Updates onboarding question.
+
+## Mood
 
 ### POST /api/mood/log
-Add or update daily mood log.
 
-**Headers**: `Authorization: Bearer <token>`
+Stores or updates mood data for a day and triggers:
+- pattern refresh
+- recommendation recalculation
+- recent emotional state cache update
 
-**Request Body**:
+Body:
 ```json
 {
-  "moodScore": 7,
-  "emotionTag": "happy",
-  "notes": "Feeling great today!",
-  "activityDone": false,
-  "date": "2024-11-24T00:00:00.000Z"  // Optional
+  "moodScore": 4,
+  "emotionTag": "stressed",
+  "notes": "Work felt heavy today.",
+  "activityDone": true,
+  "sleepHours": 5.5,
+  "screenTime": 7.5,
+  "socialInteractionLevel": "low",
+  "stressLevel": 8,
+  "timestamp": "2026-05-25T19:00:00.000Z"
 }
 ```
 
-**Response** (201):
-```json
-{
-  "message": "Mood logged successfully",
-  "log": {
-    "_id": "507f1f77bcf86cd799439012",
-    "userId": "507f1f77bcf86cd799439011",
-    "date": "2024-11-24T00:00:00.000Z",
-    "moodScore": 7,
-    "emotionTag": "happy",
-    "notes": "Feeling great today!",
-    "activityDone": false,
-    "createdAt": "2024-11-24T06:00:00.000Z"
-  }
-}
-```
-
-**Note**: If a log exists for the same date, it updates instead (returns 200).
+Response includes:
+- `log`
+- `patterns`
+- `recommendation`
 
 ### GET /api/mood/history
-Get mood log history.
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Query Parameters**:
-- `limit` (optional): Number of logs to return (default: 50)
-- `skip` (optional): Number of logs to skip (default: 0)
-- `startDate` (optional): Filter from date (ISO string)
-- `endDate` (optional): Filter to date (ISO string)
-
-**Response** (200):
-```json
-{
-  "logs": [
-    {
-      "_id": "507f1f77bcf86cd799439012",
-      "date": "2024-11-24T00:00:00.000Z",
-      "moodScore": 7,
-      "emotionTag": "happy",
-      "notes": "Feeling great today!",
-      "activityDone": false
-    }
-  ],
-  "pagination": {
-    "total": 10,
-    "limit": 50,
-    "skip": 0,
-    "hasMore": false
-  }
-}
-```
+Query params:
+- `limit`
+- `skip`
+- `startDate`
+- `endDate`
 
 ### GET /api/mood/analytics
-Get mood analytics and trends.
 
-**Headers**: `Authorization: Bearer <token>`
+Query:
+- `period=week|month`
 
-**Query Parameters**:
-- `period` (optional): "week" or "month" (default: "week")
+Returns:
+- grouped analytics
+- emotion distribution
+- overall stats
 
-**Response** (200):
-```json
-{
-  "message": "Mood analytics fetched",
-  "analytics": [
-    {
-      "_id": {
-        "year": 2024,
-        "week": 47
-      },
-      "avgMoodScore": 6.5,
-      "count": 7,
-      "emotionTags": ["happy", "calm", "neutral"],
-      "dates": ["2024-11-18T00:00:00.000Z", ...]
-    }
-  ],
-  "emotionDistribution": [
-    {
-      "_id": "happy",
-      "count": 5
-    },
-    {
-      "_id": "calm",
-      "count": 3
-    }
-  ],
-  "overallStats": {
-    "avgMoodScore": 6.5,
-    "minMoodScore": 3,
-    "maxMoodScore": 9,
-    "totalLogs": 30
-  }
-}
-```
-
----
-
-## Recommendation Endpoints
-
-### GET /api/recommendations/general
-Get general wellness recommendations (no auth required).
-
-**Response** (200):
-```json
-{
-  "message": "General recommendations fetched",
-  "tips": [
-    "Drink water",
-    "Take a 10-min walk",
-    "Practice deep breathing",
-    "Write down your thoughts",
-    "Listen to calming music",
-    "Do a short stretching routine",
-    "Take a mindful pause"
-  ]
-}
-```
+## Recommendations
 
 ### GET /api/recommendations/personalized
-Get personalized activity recommendations based on latest mood.
 
-**Headers**: `Authorization: Bearer <token>`
+Returns the current deterministic recommendation set:
 
-**Response** (200):
 ```json
 {
   "message": "Personalized recommendations fetched",
   "recommendation": {
-    "_id": "507f1f77bcf86cd799439013",
-    "userId": "507f1f77bcf86cd799439011",
-    "moodLogId": "507f1f77bcf86cd799439012",
-    "suggestedActivities": ["meditation", "breathing", "music"],
-    "status": "pending",
-    "createdAt": "2024-11-24T06:00:00.000Z"
+    "_id": "recommendation-id",
+    "activities": [
+      {
+        "_id": "activity-id",
+        "activityType": "breathing_reset",
+        "recommendationScore": 132.4,
+        "personalizedTitle": "Breathing reset",
+        "personalizedDescription": "Take a short pranayama-style breathing pause to steady your body.",
+        "relevanceContext": "matched to your stressed mood state, works well during the night",
+        "accepted": false,
+        "completed": false,
+        "ignored": false
+      }
+    ],
+    "recommendationContext": {
+      "moodScore": 4,
+      "emotionTag": "stressed",
+      "dominantPatterns": ["night_anxiety"],
+      "daySegment": "night"
+    },
+    "status": "pending"
   }
 }
 ```
 
-### PATCH /api/recommendations/:recommendationId/status
-Update recommendation status.
+### GET /api/recommendations/general
 
-**Headers**: `Authorization: Bearer <token>`
+Returns low-friction curated wellness suggestions.
 
-**Request Body**:
+### GET /api/recommendations/history
+
+Returns recent recommendation cycles for the user.
+
+### PATCH /api/recommendations/:recommendationId/activities/:activityId/status
+
+Body:
 ```json
 {
-  "status": "accepted"  // "accepted", "ignored", "completed", or "pending"
+  "action": "accepted"
 }
 ```
 
-**Response** (200):
-```json
-{
-  "message": "Recommendation status updated successfully",
-  "recommendation": { ... }
-}
-```
+Allowed actions:
+- `accepted`
+- `completed`
+- `ignored`
 
----
+This updates:
+- activity flags
+- recommendation status
+- user-specific recommendation effectiveness
 
-## Chat Endpoints
+## Chat
 
 ### POST /api/chat/query
-Send message to Gemini AI chatbot.
 
-**Headers**: `Authorization: Bearer <token>`
+Protected and rate-limited.
 
-**Request Body**:
+Body:
 ```json
 {
-  "message": "I'm feeling anxious today. What can I do?"
+  "message": "I feel restless tonight."
 }
 ```
 
-**Response** (200):
-```json
-{
-  "message": "Reply generated",
-  "reply": "I understand that anxiety can be overwhelming. Have you tried taking some deep breaths? Remember, it's okay to feel this way...",
-  "conversationId": "507f1f77bcf86cd799439014"
-}
-```
+Response includes:
+- `reply`
+- `conversationId`
+- reconstructed `context`
+
+The chatbot context is rebuilt from:
+- traits
+- recent mood history
+- detected patterns
+- successful interventions
+- recent emotional state
+- collective adaptation metadata
 
 ### GET /api/chat/history
-Get chat conversation history.
 
-**Headers**: `Authorization: Bearer <token>`
+Query:
+- `limit`
 
-**Query Parameters**:
-- `limit` (optional): Number of messages to return (default: 50)
+Returns stored conversation messages for the authenticated user.
 
-**Response** (200):
+## Resources
+
+### GET /api/resources/all
+
+Public endpoint.
+
+Query:
+- `limit`
+- `skip`
+- `category`
+
+### GET /api/resources/:category
+
+Public endpoint.
+
+Allowed categories:
+- `articles`
+- `meditation`
+- `journaling`
+- `exercise`
+- `faqs`
+
+### POST /api/resources/add
+
+Protected, admin only.
+
+Body:
 ```json
 {
-  "messages": [
-    {
-      "sender": "user",
-      "text": "I'm feeling anxious today",
-      "timestamp": "2024-11-24T06:00:00.000Z"
-    },
-    {
-      "sender": "bot",
-      "text": "I understand that anxiety can be overwhelming...",
-      "timestamp": "2024-11-24T06:00:01.000Z"
-    }
-  ],
-  "total": 10
+  "title": "Evening breathing routine",
+  "category": "meditation",
+  "contentURL": "https://example.com/breathing",
+  "description": "A short routine for calming late-night tension."
 }
 ```
 
----
+## Insights
 
-## Resource Endpoints
+### GET /api/insights/profile
 
-### GET /api/resources/all
-Get all resources.
+Returns computed insight profile such as:
+- emotional baseline
+- stress level
+- recovery rate
+- dominant emotion
 
-**Query Parameters**:
-- `limit` (optional): Number of resources (default: 50)
-- `skip` (optional): Skip number (default: 0)
-- `category` (optional): Filter by category
+### GET /api/insights/patterns
 
-**Response** (200):
+Returns detected user patterns from the insight route group.
+
+### GET /api/insights/forecast
+
+Returns short-term forecast from the insight route group.
+
+### GET /api/insights/collective-summary
+
+Returns privacy-safe collective learning summaries for frontend cards.
+
+Example shape:
 ```json
 {
-  "message": "Resources fetched successfully",
-  "resources": [
-    {
-      "_id": "507f1f77bcf86cd799439015",
-      "title": "Understanding Anxiety",
-      "category": "articles",
-      "contentURL": "https://example.com/article",
-      "description": "Learn about anxiety and coping strategies",
-      "createdBy": {
-        "_id": "507f1f77bcf86cd799439016",
-        "firstName": "Admin",
-        "lastName": "User",
-        "email": "admin@example.com"
-      },
-      "createdAt": "2024-11-24T06:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 20,
-    "limit": 50,
-    "skip": 0,
-    "hasMore": false
+  "success": true,
+  "summary": {
+    "insightCards": [
+      {
+        "title": "What tends to help",
+        "summary": "People with a similar emotional rhythm often do well with breathing reset."
+      }
+    ],
+    "behavioralTrendSummaries": [
+      {
+        "activityType": "terrace_walk",
+        "summary": "terrace walk has shown steady value in similar situations."
+      }
+    ],
+    "recommendationEvolutionIndicators": [
+      {
+        "activityType": "grounding_music",
+        "label": "grounding music is being prioritized more intelligently over time."
+      }
+    ]
   }
 }
 ```
 
-### GET /api/resources/:category
-Get resources by category.
+## Patterns
 
-**Categories**: `articles`, `meditation`, `journaling`, `exercise`, `faqs`
+### GET /api/patterns
 
-**Response** (200): Same format as `/api/resources/all`
+Returns stored user pattern state.
 
-### POST /api/resources/add
-Add new resource (Admin only).
+### POST /api/patterns/refresh
 
-**Headers**: `Authorization: Bearer <admin-token>`
+Forces pattern recalculation for the authenticated user.
 
-**Request Body**:
-```json
-{
-  "title": "New Article",
-  "category": "articles",
-  "contentURL": "https://example.com/article",
-  "description": "Article description"
-}
-```
+### GET /api/patterns/forecast
 
-**Response** (201):
-```json
-{
-  "message": "Resource added successfully",
-  "resource": { ... }
-}
-```
+Returns forecast from the dedicated pattern route group.
 
----
+## Error Shape
 
-## ML Server Endpoints
-
-### GET /
-Health check.
-
-**Response** (200):
-```json
-{
-  "message": "MindEase ML Server Running - Mood Prediction & Recommendations Only"
-}
-```
-
-### POST /predict
-Predict sentiment and mood score from text.
-
-**Request Body**:
-```json
-{
-  "text": "I feel amazing today! Everything is going great!"
-}
-```
-
-**Response** (200):
-```json
-{
-  "sentiment": "positive",
-  "moodScore": 8
-}
-```
-
-### POST /recommend
-Get activity recommendations based on mood.
-
-**Request Body**:
-```json
-{
-  "moodScore": 4,
-  "emotionTag": "sad"
-}
-```
-
-**Response** (200):
-```json
-{
-  "suggestions": ["meditation", "breathing", "journaling", "music"]
-}
-```
-
-**Valid Activities**: `meditation`, `journaling`, `music`, `workout`, `breathing`, `walk`
-
----
-
-## Error Responses
-
-### 400 Bad Request
+Typical error response:
 ```json
 {
   "success": false,
   "message": "Validation error",
-  "errors": ["Email is required", "Password must be at least 8 characters"]
+  "errors": [
+    "\"emotionTag\" is required"
+  ]
 }
 ```
 
-### 401 Unauthorized
-```json
-{
-  "success": false,
-  "message": "Not authorized, no token"
-}
-```
-
-### 404 Not Found
-```json
-{
-  "success": false,
-  "message": "Route not found",
-  "path": "/api/invalid"
-}
-```
-
-### 500 Internal Server Error
-```json
-{
-  "success": false,
-  "message": "Internal server error"
-}
-```
-
----
-
-## Status Codes Summary
-
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request (validation error)
-- `401` - Unauthorized (missing/invalid token)
-- `403` - Forbidden (insufficient permissions)
-- `404` - Not Found
-- `500` - Internal Server Error
-- `503` - Service Unavailable (database not connected)
-
----
-
-## Testing
-
-Use the provided test script:
-```bash
-cd server
-node test-final.js
-```
-
-All 35 endpoints are tested and verified working! ✅
-
+Other common statuses:
+- `400` validation or bad input
+- `401` unauthenticated
+- `403` forbidden
+- `404` not found
+- `429` chat rate limit
+- `500` internal server error

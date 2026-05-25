@@ -38,16 +38,16 @@ export default function ChatWindow({ variant = "page", onClose }) {
   }
 
   return (
-    <Card className={cn("flex w-full flex-col overflow-hidden border-slate-200 bg-white/95 shadow-xl", isWidget ? "h-[30rem]" : "h-full")}>
+    <Card className={cn("flex w-full flex-col overflow-hidden border-border/70 bg-card/95 shadow-xl", isWidget ? "h-[30rem]" : "h-full")}>
       {isWidget && (
-        <div className="flex items-center justify-between border-b border-slate-200 bg-emerald-50/80 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-border/70 bg-emerald-50/80 px-4 py-3 dark:bg-emerald-500/10">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">MindEase Chat</p>
-              <p className="text-xs text-slate-500">Context rebuilt from mood, patterns, and recent progress</p>
+              <p className="text-sm font-semibold text-foreground">MindEase Chat</p>
+              <p className="text-xs text-muted-foreground">Context rebuilt from mood, patterns, and recent progress</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -58,7 +58,7 @@ export default function ChatWindow({ variant = "page", onClose }) {
 
       <CardContent className="flex flex-1 flex-col p-0">
         {chatbotContext && (
-          <div className="border-b border-slate-200 bg-slate-50/80 px-4 py-3 text-xs text-slate-500">
+          <div className="border-b border-border/70 bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
             Tone adapts from {chatbotContext.recentEmotionalState?.emotionTag || "recent mood"} and {chatbotContext.detectedPatterns?.length || 0} detected patterns.
           </div>
         )}
@@ -70,9 +70,9 @@ export default function ChatWindow({ variant = "page", onClose }) {
             </div>
           ) : chatMessages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <MessageSquare className="mb-4 h-12 w-12 text-slate-300" />
-              <h3 className="text-lg font-semibold text-slate-900">Adaptive chat is ready</h3>
-              <p className="mt-2 max-w-md text-sm text-slate-500">
+              <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <h3 className="text-lg font-semibold text-foreground">Adaptive chat is ready</h3>
+              <p className="mt-2 max-w-md text-sm text-muted-foreground">
                 Ask for grounding help, reflection prompts, or support with how you are feeling right now.
               </p>
             </div>
@@ -87,7 +87,7 @@ export default function ChatWindow({ variant = "page", onClose }) {
                   className={cn("flex gap-3", msg.sender === "user" ? "justify-end" : "justify-start")}
                 >
                   {msg.sender === "bot" && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
@@ -96,18 +96,18 @@ export default function ChatWindow({ variant = "page", onClose }) {
                       "max-w-[80%] rounded-3xl border px-4 py-3 shadow-sm",
                       msg.sender === "user"
                         ? "border-emerald-500 bg-emerald-500 text-white"
-                        : "border-slate-200 bg-white text-slate-700"
+                        : "border-border/70 bg-background/80 text-foreground"
                     )}
                   >
                     <p className="whitespace-pre-wrap text-sm leading-6">{msg.text}</p>
                     {msg.timestamp && (
-                      <p className={cn("mt-2 text-[10px] uppercase tracking-[0.16em]", msg.sender === "user" ? "text-white/70" : "text-slate-400")}>
+                      <p className={cn("mt-2 text-[10px] uppercase tracking-[0.16em]", msg.sender === "user" ? "text-white/70" : "text-muted-foreground")}>
                         {formatDateTime(msg.timestamp)}
                       </p>
                     )}
                   </div>
                   {msg.sender === "user" && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-foreground">
                       <User className="h-4 w-4" />
                     </div>
                   )}
@@ -117,10 +117,10 @@ export default function ChatWindow({ variant = "page", onClose }) {
           )}
           {chatStatus === "loading" && chatMessages.length > 0 && (
             <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
                 <Bot className="h-4 w-4" />
               </div>
-              <div className="rounded-3xl border border-slate-200 bg-white px-4 py-3">
+              <div className="rounded-3xl border border-border/70 bg-background/80 px-4 py-3">
                 <LoadingSpinner size="sm" />
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function ChatWindow({ variant = "page", onClose }) {
           <div ref={endRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="flex gap-3 border-t border-slate-200 bg-white p-4">
+        <form onSubmit={handleSubmit} className="flex gap-3 border-t border-border/70 bg-card/95 p-4">
           <Textarea
             value={message}
             onChange={(event) => setMessage(event.target.value)}

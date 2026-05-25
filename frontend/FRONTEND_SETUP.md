@@ -1,298 +1,88 @@
-# MindEase Frontend - Setup Guide
+# Frontend Setup Guide
 
-## 🚀 Quick Start
+## Install
 
-1. **Navigate to frontend directory:**
 ```bash
 cd frontend
-```
-
-2. **Install dependencies:**
-```bash
 npm install
 ```
 
-3. **Create environment file:**
-Create a `.env` file in the frontend directory:
-```
-VITE_API_URL=https://mindease-node-server.onrender.com
+## Environment
+
+Create `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:8080
 ```
 
-4. **Start development server:**
+Use your deployed API URL in production.
+
+## Run
+
 ```bash
 npm run dev
 ```
 
-5. **Open in browser:**
-Visit `http://localhost:5173`
+Default dev URL:
+- `http://localhost:5173`
 
-## 📁 Project Structure
+## Build
 
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── ui/              # Reusable UI components
-│   │   │   ├── Button.jsx
-│   │   │   ├── Card.jsx
-│   │   │   ├── Input.jsx
-│   │   │   ├── Dialog.jsx
-│   │   │   └── ...
-│   │   └── layout/          # Layout components
-│   │       ├── Layout.jsx
-│   │       ├── Navbar.jsx
-│   │       └── Sidebar.jsx
-│   ├── contexts/            # React contexts
-│   │   ├── AuthContext.jsx
-│   │   └── ThemeContext.jsx
-│   ├── lib/                 # Utilities
-│   │   ├── api.js          # API client
-│   │   └── utils.js        # Helper functions
-│   ├── pages/              # Page components
-│   │   ├── Login.jsx
-│   │   ├── Signup.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── MoodTracker.jsx
-│   │   ├── MoodAnalytics.jsx
-│   │   ├── Recommendations.jsx
-│   │   ├── Chat.jsx
-│   │   ├── Resources.jsx
-│   │   └── Profile.jsx
-│   ├── App.jsx             # Main app component
-│   ├── main.jsx            # Entry point
-│   └── index.css           # Global styles
-├── public/                 # Static assets
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-└── postcss.config.js
-```
-
-## 🎨 Features
-
-### ✅ Implemented Features
-
-1. **Authentication**
-   - Login/Signup pages
-   - JWT token management
-   - Protected routes
-   - Auto-logout on token expiration
-
-2. **Dashboard**
-   - Welcome message
-   - Quick stats cards
-   - Recent mood display
-   - Quick action buttons
-   - Recommendations preview
-
-3. **Mood Tracking**
-   - Daily mood logging (1-10 scale)
-   - Emotion tagging
-   - Notes support
-   - Activity completion tracking
-   - Visual mood indicator
-   - Today's mood display
-
-4. **Analytics**
-   - Weekly/Monthly mood trends
-   - Line charts for mood scores
-   - Pie charts for emotion distribution
-   - Bar charts for log frequency
-   - Overall statistics cards
-   - Period switching (week/month)
-
-5. **Recommendations**
-   - Personalized activity suggestions
-   - General wellness tips
-   - Activity status management
-   - Beautiful activity cards with icons
-
-6. **AI Chat**
-   - Gemini AI integration
-   - Real-time messaging
-   - Conversation history
-   - Message timestamps
-   - Loading states
-
-7. **Resources**
-   - Resource listing
-   - Category filtering
-   - Pagination
-   - External links
-   - Resource cards
-
-8. **Profile**
-   - User information display
-   - Profile editing
-   - Preference management
-   - Account deletion
-   - Avatar with initials
-
-9. **UI/UX**
-   - Dark/Light theme toggle
-   - Smooth animations (Framer Motion)
-   - Responsive design
-   - Loading states
-   - Error handling
-   - Toast notifications
-   - Skeleton loaders
-
-## 🎯 Key Components
-
-### UI Components (shadcn/ui style)
-- Button (with variants and sizes)
-- Card (with Header, Content, Footer)
-- Input, Textarea, Select
-- Label
-- Badge
-- Dialog
-- DropdownMenu
-- LoadingSpinner
-- Skeleton
-
-### Layout Components
-- Layout (main layout wrapper)
-- Navbar (top navigation with theme toggle)
-- Sidebar (navigation menu)
-
-### Pages
-- Login/Signup (authentication)
-- Dashboard (overview)
-- MoodTracker (log moods)
-- MoodAnalytics (charts and stats)
-- Recommendations (activities and tips)
-- Chat (AI chatbot)
-- Resources (content library)
-- Profile (user settings)
-
-## 🔧 Configuration
-
-### Environment Variables
-- `VITE_API_URL` - Backend API base URL
-
-### Theme Configuration
-The theme system uses CSS variables defined in `src/index.css`. The theme can be toggled between light and dark modes.
-
-### API Configuration
-All API calls are centralized in `src/lib/api.js` using Axios. The client automatically:
-- Adds JWT tokens to requests
-- Handles 401 errors (auto-logout)
-- Provides error handling
-
-## 📦 Dependencies
-
-### Core
-- React 18
-- React Router 6
-- Vite
-
-### Styling
-- TailwindCSS
-- class-variance-authority
-- tailwind-merge
-- clsx
-
-### UI/Animations
-- Framer Motion
-- Lucide React (icons)
-- Recharts (charts)
-
-### Data Fetching
-- React Query (TanStack Query)
-- Axios
-
-### Forms/Validation
-- React Hook Form
-- Zod
-
-### Utilities
-- date-fns
-- react-hot-toast
-
-## 🚀 Build & Deploy
-
-### Development
-```bash
-npm run dev
-```
-
-### Production Build
 ```bash
 npm run build
 ```
 
-### Preview Production Build
-```bash
-npm run preview
-```
+## Frontend Architecture
 
-## 🎨 Design System
+### Core folders
 
-### Colors
-- Primary: Purple/violet (mental wellness theme)
-- Secondary: Muted grays
-- Accent: Subtle highlights
-- Destructive: Red for dangerous actions
+- `src/components/` reusable UI, layout, onboarding, and chat components
+- `src/contexts/` auth and theme context
+- `src/features/` Redux Toolkit slices
+- `src/lib/` API client and utilities
+- `src/pages/` route-level screens
+- `src/store/` Redux store
 
-### Typography
-- Headings: Bold, clear hierarchy
-- Body: Readable, comfortable line height
-- Small text: Muted for secondary information
+### Intelligence-aware pages
 
-### Spacing
-- Consistent spacing scale
-- Responsive padding/margins
-- Card spacing: 6 (24px)
+- `Dashboard` shows adaptive and collective summaries
+- `MoodTracker` logs contextual wellness data
+- `Recommendations` supports accept/complete/ignore actions
+- `Chat` uses reconstructed emotional context
+- `MoodAnalytics` shows patterns, forecast, and collective learning indicators
 
-### Animations
-- Page transitions: Fade + slide
-- Component animations: Stagger children
-- Hover effects: Scale and color transitions
-- Loading: Smooth spinners
+## State and Data Flow
 
-## 🔐 Security
+1. `AuthContext` manages token-backed user session.
+2. `App.jsx` loads onboarding profile and adaptive dashboard state after login.
+3. `adaptiveSlice` fetches:
+   - latest mood
+   - recommendations
+   - recommendation history
+   - patterns
+   - forecast
+   - insight profile
+   - collective summary
+4. Chat history and chat context are updated through the same slice.
 
-- JWT tokens stored in localStorage
-- Automatic token refresh handling
-- Protected routes
-- Input validation
-- XSS protection via React
+## Theme
 
-## 📱 Responsive Design
+- Theme is controlled by `ThemeContext`.
+- Global tokens are defined in [index.css](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/index.css>).
+- Panels should prefer semantic Tailwind token classes such as `bg-card`, `text-foreground`, `text-muted-foreground`, and `border-border`.
 
-- Mobile-first approach
-- Breakpoints: sm (640px), md (768px), lg (1024px)
-- Mobile sidebar with overlay
-- Responsive grid layouts
-- Touch-friendly buttons
+## Troubleshooting
 
-## 🐛 Troubleshooting
+API issues:
+- verify `VITE_API_URL`
+- verify backend CORS config
+- verify JWT token is present after login
 
-### Common Issues
+Theme issues:
+- verify `ThemeProvider` wraps the app
+- avoid hardcoded light-only classes in page panels
 
-1. **API connection errors**
-   - Check `VITE_API_URL` in `.env`
-   - Verify backend server is running
-   - Check CORS settings
-
-2. **Theme not working**
-   - Clear browser cache
-   - Check `ThemeContext` is wrapping app
-
-3. **Build errors**
-   - Delete `node_modules` and reinstall
-   - Check Node.js version (18+)
-   - Clear Vite cache
-
-## 📝 Notes
-
-- All API endpoints match the backend structure
-- Error handling is comprehensive
-- Loading states for all async operations
-- Toast notifications for user feedback
-- Accessible components (ARIA labels, keyboard navigation)
-
-## 🎉 Ready to Use!
-
-The frontend is fully functional and ready for development. All features from the backend are integrated and working. Just install dependencies and start coding!
-
+Build issues:
+- remove `node_modules`
+- reinstall dependencies
+- rerun `npm run build`

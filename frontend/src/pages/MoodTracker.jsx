@@ -57,15 +57,15 @@ export default function MoodTracker() {
       <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
         <div className="flex flex-wrap items-center gap-3">
           <BackButton />
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Mood Logging</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Mood Logging</h1>
         </div>
-        <p className="max-w-2xl text-sm leading-6 text-slate-600">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
           Add enough context for the adaptive engine to respond differently tomorrow than it does today.
         </p>
       </motion.div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>How are you feeling right now?</CardTitle>
             <CardDescription>These signals feed pattern detection, forecasting, and personalized recommendations.</CardDescription>
@@ -97,7 +97,7 @@ export default function MoodTracker() {
 
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-slate-400" />
+                  <Users className="h-4 w-4 text-muted-foreground" />
                   Social Interaction
                 </Label>
                 <Select
@@ -123,12 +123,12 @@ export default function MoodTracker() {
               />
             </div>
 
-            <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+            <label className="flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/30 px-4 py-3 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={form.activityDone}
                 onChange={(event) => updateField("activityDone", event.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                className="h-4 w-4 rounded border-input bg-background text-emerald-600 focus:ring-emerald-500"
               />
               I completed a wellness activity today.
             </label>
@@ -148,7 +148,7 @@ export default function MoodTracker() {
 
         <div className="space-y-6">
           {cards.map(({ label, key, icon: Icon, min, max, step }) => (
-            <Card key={key} className="border-slate-200 bg-white/95">
+            <Card key={key} className="border-border/70 bg-card/95">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Icon className="h-4 w-4 text-emerald-500" />
@@ -156,7 +156,7 @@ export default function MoodTracker() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="text-3xl font-bold text-slate-900">{form[key]}</div>
+                <div className="text-3xl font-bold text-foreground">{form[key]}</div>
                 <input
                   type="range"
                   min={min}

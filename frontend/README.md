@@ -1,139 +1,105 @@
 # MindEase Frontend
 
-A modern, production-ready React frontend for the MindEase mental wellness application.
+Frontend for the MindEase mental wellness platform.
 
-## Features
+Tech stack:
+- React 18
+- Vite
+- TailwindCSS
+- Redux Toolkit
+- React Router
+- React Query
+- Framer Motion
+- Recharts
 
-- 🎨 **Modern UI**: Built with TailwindCSS and shadcn/ui components
-- 🌙 **Dark Mode**: Full theme support with smooth transitions
-- 📱 **Responsive**: Works perfectly on all screen sizes
-- ✨ **Animations**: Smooth animations with Framer Motion
-- 🔐 **Authentication**: Secure JWT-based authentication
-- 📊 **Charts**: Beautiful data visualization with Recharts
-- 💬 **AI Chat**: Integrated Gemini AI chatbot
-- 🎯 **Type Safe**: Form validation and error handling
-- ⚡ **Fast**: Optimized with React Query for data fetching
+## Current Scope
 
-## Tech Stack
+The frontend supports the full implemented product flow:
 
-- **React 18** - UI library
-- **Vite** - Build tool
-- **TailwindCSS** - Styling
-- **Framer Motion** - Animations
-- **React Query** - Data fetching
-- **React Router** - Routing
-- **Recharts** - Charts
-- **Axios** - HTTP client
-- **React Hot Toast** - Notifications
+- authentication
+- adaptive onboarding
+- personalized dashboard
+- mood logging
+- recommendation feedback loop
+- adaptive chatbot
+- emotional insights
+- collective learning summaries
+- resources
+- profile management
 
-## Getting Started
+## Main State Layers
 
-### Prerequisites
+Context:
+- `AuthContext`
+- `ThemeContext`
 
-- Node.js 18+ and npm
+Redux:
+- onboarding slice
+- adaptive slice
 
-### Installation
+The adaptive slice stores:
+- current emotional state
+- recommendations
+- recommendation history
+- patterns
+- forecast
+- chatbot context
+- collective summaries
 
-1. Install dependencies:
+## Main Routes
+
+- `/login`
+- `/signup`
+- `/onboarding/welcome`
+- `/onboarding/question/:id`
+- `/onboarding/complete`
+- `/dashboard`
+- `/mood-tracker`
+- `/analytics`
+- `/recommendations`
+- `/chat`
+- `/resources`
+- `/profile`
+
+## Setup
+
 ```bash
+cd frontend
 npm install
 ```
 
-2. Create a `.env` file:
-```bash
-cp .env.example .env
+Create `.env`:
+
+```env
+VITE_API_URL=http://localhost:8080
 ```
 
-3. Update `.env` with your API URL:
-```
-VITE_API_URL=https://mindease-node-server.onrender.com
-```
+Run:
 
-4. Start the development server:
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:5173](http://localhost:5173) in your browser
-
-## Build for Production
+Build:
 
 ```bash
 npm run build
 ```
 
-The built files will be in the `dist` directory.
+## Important Files
 
-## Project Structure
+- [App.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/App.jsx>)
+- [api.js](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/lib/api.js>)
+- [adaptiveSlice.js](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/features/adaptive/adaptiveSlice.js>)
+- [onboardingSlice.js](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/features/onboarding/onboardingSlice.js>)
+- [Dashboard.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/pages/Dashboard.jsx>)
+- [MoodTracker.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/pages/MoodTracker.jsx>)
+- [MoodAnalytics.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/pages/MoodAnalytics.jsx>)
+- [Recommendations.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/pages/Recommendations.jsx>)
+- [ChatWindow.jsx](</e:/FULL STACK/sem7/Final year Project/app/frontend/src/components/chat/ChatWindow.jsx>)
 
-```
-frontend/
-├── src/
-│   ├── components/       # Reusable UI components
-│   │   ├── ui/          # Base UI components (Button, Card, etc.)
-│   │   └── layout/      # Layout components (Navbar, Sidebar)
-│   ├── contexts/        # React contexts (Auth, Theme)
-│   ├── lib/            # Utilities and API client
-│   ├── pages/          # Page components
-│   ├── App.jsx         # Main app component
-│   └── main.jsx        # Entry point
-├── public/             # Static assets
-└── package.json        # Dependencies
-```
+## Notes
 
-## Available Pages
-
-- `/login` - User login
-- `/signup` - User registration
-- `/dashboard` - Main dashboard
-- `/mood-tracker` - Log and track moods
-- `/analytics` - View mood analytics and charts
-- `/recommendations` - Personalized recommendations
-- `/chat` - AI wellness chatbot
-- `/resources` - Mental health resources
-- `/profile` - User profile management
-
-## Features Overview
-
-### Authentication
-- Secure JWT-based authentication
-- Protected routes
-- Auto-logout on token expiration
-
-### Mood Tracking
-- Daily mood logging with score (1-10)
-- Emotion tagging
-- Notes and activity tracking
-- Mood history with pagination
-
-### Analytics
-- Weekly and monthly mood trends
-- Emotion distribution charts
-- Overall statistics
-- Interactive charts with Recharts
-
-### Recommendations
-- Personalized activity suggestions
-- General wellness tips
-- Status tracking (accepted, completed, ignored)
-
-### AI Chat
-- Gemini AI integration
-- Conversation history
-- Real-time messaging
-- Mental health focused responses
-
-### Resources
-- Curated mental health content
-- Category filtering
-- External links
-- Pagination
-
-## Environment Variables
-
-- `VITE_API_URL` - Backend API URL (default: https://mindease-node-server.onrender.com)
-
-## License
-
-MIT
-
+- Theme support is implemented with CSS variables and `ThemeContext`.
+- The frontend assumes the backend API is already running.
+- Chat, recommendations, patterns, and collective summaries depend on authenticated access.

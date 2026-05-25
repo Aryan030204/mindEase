@@ -67,9 +67,9 @@ export default function MoodAnalytics() {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
             <BackButton />
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Emotional Insights</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Emotional Insights</h1>
           </div>
-          <p className="text-sm text-slate-600">Charts from your mood timeline, plus adaptive patterns and short-term forecasting.</p>
+          <p className="text-sm text-muted-foreground">Charts from your mood timeline, plus adaptive patterns and short-term forecasting.</p>
         </div>
         <Select value={period} onChange={(event) => setPeriod(event.target.value)}>
           <option value="week">Weekly</option>
@@ -79,43 +79,43 @@ export default function MoodAnalytics() {
 
       {overallStats && (
         <section className="grid gap-4 md:grid-cols-4">
-          <Card className="border-slate-200 bg-white/95">
+          <Card className="border-border/70 bg-card/95">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Average Mood</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{overallStats.avgMoodScore?.toFixed(1) || "-"}</div>
+              <div className="text-3xl font-bold text-foreground">{overallStats.avgMoodScore?.toFixed(1) || "-"}</div>
             </CardContent>
           </Card>
-          <Card className="border-slate-200 bg-white/95">
+          <Card className="border-border/70 bg-card/95">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <Calendar className="h-4 w-4 text-slate-400" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                 Total Logs
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{overallStats.totalLogs || 0}</div>
+              <div className="text-3xl font-bold text-foreground">{overallStats.totalLogs || 0}</div>
             </CardContent>
           </Card>
-          <Card className="border-slate-200 bg-white/95">
+          <Card className="border-border/70 bg-card/95">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Highest Mood</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{overallStats.maxMoodScore || "-"}</div>
+              <div className="text-3xl font-bold text-foreground">{overallStats.maxMoodScore || "-"}</div>
             </CardContent>
           </Card>
-          <Card className="border-slate-200 bg-white/95">
+          <Card className="border-border/70 bg-card/95">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <TrendingUp className="h-4 w-4 text-slate-400" />
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 Forecast
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{forecast?.predictedMood || "-"}</div>
-              <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+              <div className="text-3xl font-bold text-foreground">{forecast?.predictedMood || "-"}</div>
+              <p className="mt-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                 {forecast?.predictedTrend || "stable"} trend
               </p>
             </CardContent>
@@ -124,20 +124,20 @@ export default function MoodAnalytics() {
       )}
 
       <section className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Adaptive Profile</CardTitle>
             <CardDescription>Summary derived from your recent log history.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-slate-600">
-            <p>Baseline mood: <span className="font-semibold text-slate-900">{insightProfile?.emotionalBaseline?.toFixed?.(1) || "-"}</span></p>
-            <p>Stress level: <span className="font-semibold capitalize text-slate-900">{insightProfile?.stressLevel || "-"}</span></p>
-            <p>Recovery rate: <span className="font-semibold capitalize text-slate-900">{insightProfile?.recoveryRate || "-"}</span></p>
-            <p>Dominant emotion: <span className="font-semibold capitalize text-slate-900">{insightProfile?.dominantEmotion || "-"}</span></p>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p>Baseline mood: <span className="font-semibold text-foreground">{insightProfile?.emotionalBaseline?.toFixed?.(1) || "-"}</span></p>
+            <p>Stress level: <span className="font-semibold capitalize text-foreground">{insightProfile?.stressLevel || "-"}</span></p>
+            <p>Recovery rate: <span className="font-semibold capitalize text-foreground">{insightProfile?.recoveryRate || "-"}</span></p>
+            <p>Dominant emotion: <span className="font-semibold capitalize text-foreground">{insightProfile?.dominantEmotion || "-"}</span></p>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 bg-white/95 lg:col-span-2">
+        <Card className="border-border/70 bg-card/95 lg:col-span-2">
           <CardHeader>
             <CardTitle>Detected Patterns</CardTitle>
             <CardDescription>Deterministic patterns that can influence ranking and chat tone.</CardDescription>
@@ -145,22 +145,22 @@ export default function MoodAnalytics() {
           <CardContent className="grid gap-3 md:grid-cols-2">
             {patterns.length ? (
               patterns.map((pattern) => (
-                <div key={pattern.type} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                  <p className="font-medium text-slate-900">{pattern.description}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-400">
+                <div key={pattern.type} className="rounded-2xl border border-border/70 bg-muted/30 p-4">
+                  <p className="font-medium text-foreground">{pattern.description}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     confidence {Math.round(pattern.confidence * 100)}%
                   </p>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">Patterns appear after enough behavioral signal is available.</p>
+              <p className="text-sm text-muted-foreground">Patterns appear after enough behavioral signal is available.</p>
             )}
           </CardContent>
         </Card>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Behavioral Trend Summaries</CardTitle>
             <CardDescription>Human-friendly reflections from anonymized learning across similar situations.</CardDescription>
@@ -168,17 +168,17 @@ export default function MoodAnalytics() {
           <CardContent className="space-y-3">
             {collectiveSummary.behavioralTrendSummaries.length ? (
               collectiveSummary.behavioralTrendSummaries.map((item) => (
-                <div key={item.activityType} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                  <p className="font-medium text-slate-900">{item.summary}</p>
+                <div key={item.activityType} className="rounded-2xl border border-border/70 bg-muted/30 p-4">
+                  <p className="font-medium text-foreground">{item.summary}</p>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">Collective trend summaries will appear as the system gathers enough anonymous outcomes.</p>
+              <p className="text-sm text-muted-foreground">Collective trend summaries will appear as the system gathers enough anonymous outcomes.</p>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Recommendation Evolution</CardTitle>
             <CardDescription>Signals that the recommendation engine is learning what tends to help.</CardDescription>
@@ -186,19 +186,19 @@ export default function MoodAnalytics() {
           <CardContent className="space-y-3">
             {collectiveSummary.recommendationEvolutionIndicators.length ? (
               collectiveSummary.recommendationEvolutionIndicators.map((item) => (
-                <div key={item.activityType} className="rounded-2xl bg-emerald-50/80 p-4">
-                  <p className="font-medium text-slate-900">{item.label}</p>
+                <div key={item.activityType} className="rounded-2xl bg-emerald-50/80 p-4 dark:bg-emerald-500/10">
+                  <p className="font-medium text-foreground">{item.label}</p>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">Evolution indicators will appear after more anonymized recommendation outcomes accumulate.</p>
+              <p className="text-sm text-muted-foreground">Evolution indicators will appear after more anonymized recommendation outcomes accumulate.</p>
             )}
           </CardContent>
         </Card>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Mood Trend</CardTitle>
             <CardDescription>Average mood over time.</CardDescription>
@@ -215,12 +215,12 @@ export default function MoodAnalytics() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-[300px] items-center justify-center text-sm text-slate-500">No mood trend yet.</div>
+              <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">No mood trend yet.</div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Emotion Distribution</CardTitle>
             <CardDescription>Which emotions show up most often.</CardDescription>
@@ -238,14 +238,14 @@ export default function MoodAnalytics() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-[300px] items-center justify-center text-sm text-slate-500">No emotion distribution yet.</div>
+              <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">No emotion distribution yet.</div>
             )}
           </CardContent>
         </Card>
       </section>
 
       {chartData.length > 0 && (
-        <Card className="border-slate-200 bg-white/95">
+        <Card className="border-border/70 bg-card/95">
           <CardHeader>
             <CardTitle>Logging Frequency</CardTitle>
             <CardDescription>How often entries are being recorded.</CardDescription>
