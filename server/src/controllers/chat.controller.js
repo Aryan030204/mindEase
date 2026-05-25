@@ -1,84 +1,86 @@
-import asyncHandler from "../utils/asyncHandler.js";
 import mongoose from "mongoose";
 import Conversation from "../models/Conversation.model.js";
-import { askAI } from "../services/ai.service.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { generateChatReply } from "../services/ai.service.js";
+import { buildChatContext } from "../services/chatContext.service.js";
+import { pushList } from "../services/redis.service.js";
+import { sanitizeText } from "../utils/sanitize.js";
 
-// -----------------------------------------------------
-// SEND USER QUERY → AI BOT RESPONSE + SAVE CHAT
-// -----------------------------------------------------
+const CHAT_CONTEXT_TTL = 60 * 60;
+
+const toObjectId = (value) =>
+  mongoose.Types.ObjectId.isValid(value) ? new mongoose.Types.ObjectId(value) : value;
+
 export const sendChatQuery = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { message } = req.body;
+  const userObjectId = toObjectId(userId);
+  const safeMessage = sanitizeText(req.body.message, 2000);
 
-  // Convert to ObjectId if needed
-  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
-    ? new mongoose.Types.ObjectId(userId)
-    : userId;
+  const [conversation, chatContext] = await Promise.all([
+    Conversation.findOne({ userId: userObjectId }),
+    buildChatContext(userObjectId),
+  ]);
 
-  // Get conversation history for context
-  let conversation = await Conversation.findOne({ userId: userObjectId });
-  const conversationHistory = conversation?.messages || [];
-
-  // Get AI response from Gemini API with conversation context
-  const aiReply = await askAI(message, conversationHistory);
-
-  // Find existing conversation or create new one
-  if (!conversation) {
-    conversation = await Conversation.create({
-      userId: userObjectId,
-      messages: [],
-    });
-  }
-
-  // Push user message
-  conversation.messages.push({
-    sender: "user",
-    text: message.trim(),
+  const aiReply = await generateChatReply({
+    message: safeMessage,
+    context: chatContext,
   });
 
-  // Push AI response
-  conversation.messages.push({
+  const activeConversation =
+    conversation ||
+    (await Conversation.create({
+      userId: userObjectId,
+      messages: [],
+    }));
+
+  activeConversation.messages.push({
+    sender: "user",
+    text: safeMessage,
+  });
+  activeConversation.messages.push({
     sender: "bot",
     text: aiReply,
   });
 
-  // Limit conversation history to last 100 messages to prevent bloating
-  if (conversation.messages.length > 100) {
-    conversation.messages = conversation.messages.slice(-100);
+  if (activeConversation.messages.length > 100) {
+    activeConversation.messages = activeConversation.messages.slice(-100);
   }
 
-  await conversation.save();
+  await activeConversation.save();
+
+  await Promise.all([
+    pushList(
+      `chat-context:${userId}`,
+      { sender: "user", text: safeMessage, timestamp: new Date().toISOString() },
+      CHAT_CONTEXT_TTL,
+      24
+    ),
+    pushList(
+      `chat-context:${userId}`,
+      { sender: "bot", text: aiReply, timestamp: new Date().toISOString() },
+      CHAT_CONTEXT_TTL,
+      24
+    ),
+  ]);
 
   return res.status(200).json({
     message: "Reply generated",
     reply: aiReply,
-    conversationId: conversation._id,
+    context: chatContext,
+    conversationId: activeConversation._id,
   });
 });
 
-// -----------------------------------------------------
-// GET USER CHAT HISTORY
-// -----------------------------------------------------
 export const getChatHistory = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
-  const { limit = 50 } = req.query;
-
-  // Convert to ObjectId if needed
-  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
-    ? new mongoose.Types.ObjectId(userId)
-    : userId;
-
-  const conversation = await Conversation.findOne({ userId: userObjectId });
+  const conversation = await Conversation.findOne({ userId: toObjectId(req.user.id) });
+  const limit = parseInt(req.query.limit || 50, 10);
 
   if (!conversation || !conversation.messages.length) {
     return res.status(200).json({ messages: [] });
   }
 
-  // Return last N messages
-  const messages = conversation.messages.slice(-parseInt(limit));
-
   return res.status(200).json({
-    messages,
+    messages: conversation.messages.slice(-limit),
     total: conversation.messages.length,
   });
 });

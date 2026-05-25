@@ -11,6 +11,8 @@ import recommendationRoutes from "./routes/recommendation.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import resourceRoutes from "./routes/resource.routes.js";
 import insightRoutes from "./routes/insight.routes.js";
+import onboardingRoutes from "./routes/onboarding.routes.js";
+import patternRoutes from "./routes/pattern.routes.js";
 
 import errorMiddleware from "./middlewares/error.middleware.js";
 
@@ -73,6 +75,7 @@ app.get("/api", (req, res) => {
       recommendations: "/api/recommendations",
       chat: "/api/chat",
       resources: "/api/resources",
+      patterns: "/api/patterns",
     },
   });
 });
@@ -85,6 +88,8 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/insights", insightRoutes);
+app.use("/api/patterns", patternRoutes);
+app.use("/api/onboarding", onboardingRoutes);
 
 // 404 handler
 app.use((req, res) => {

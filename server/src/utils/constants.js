@@ -6,6 +6,9 @@ export const EMOTION_TAGS = [
   "neutral",
   "angry",
   "excited",
+  "tired",
+  "stressed",
+  "overwhelmed",
 ];
 
 export const RESOURCE_CATEGORIES = [

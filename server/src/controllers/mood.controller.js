@@ -1,90 +1,111 @@
+import mongoose from "mongoose";
 import MoodLog from "../models/MoodLog.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import mongoose from "mongoose";
+import { sanitizeText } from "../utils/sanitize.js";
+import { detectUserPatterns } from "../services/patternDetection.service.js";
+import { generatePersonalizedRecommendation } from "../services/recommendationEngine.service.js";
+import { setJson } from "../services/redis.service.js";
 
-// -----------------------------------------------------
-// Add Daily Mood Log
-// -----------------------------------------------------
+const EMOTIONAL_STATE_TTL = 60 * 60 * 12;
+
+const toObjectId = (value) =>
+  mongoose.Types.ObjectId.isValid(value) ? new mongoose.Types.ObjectId(value) : value;
+
 export const addMoodLog = asyncHandler(async (req, res) => {
-  const { moodScore, emotionTag, notes, activityDone, date } = req.body;
-  const userId = req.user.id;
-
-  // Convert to ObjectId if needed
-  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
-    ? new mongoose.Types.ObjectId(userId)
-    : userId;
-
-  // Use provided date or current date, normalize to start of day
-  const logDate = date ? new Date(date) : new Date();
-  logDate.setHours(0, 0, 0, 0);
-
-  // Check if user already logged mood for this date
-  const existingLog = await MoodLog.findOne({
-    userId: userObjectId,
-    date: {
-      $gte: new Date(logDate),
-      $lt: new Date(logDate.getTime() + 24 * 60 * 60 * 1000),
-    },
-  });
-
-  if (existingLog) {
-    // Update existing log instead of creating duplicate
-    existingLog.moodScore = moodScore;
-    existingLog.emotionTag = emotionTag;
-    existingLog.notes = notes;
-    existingLog.activityDone = activityDone;
-    await existingLog.save();
-
-    return res.status(200).json({
-      message: "Mood log updated successfully",
-      log: existingLog,
-    });
-  }
-
-  const moodLog = await MoodLog.create({
-    userId: userObjectId,
-    date: logDate,
+  const {
     moodScore,
     emotionTag,
     notes,
     activityDone,
+    sleepHours,
+    screenTime,
+    socialInteractionLevel,
+    stressLevel,
+    timestamp,
+  } = req.body;
+  const userId = req.user.id;
+  const userObjectId = toObjectId(userId);
+
+  const logTimestamp = timestamp ? new Date(timestamp) : new Date();
+  const dayStart = new Date(logTimestamp);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+
+  const payload = {
+    moodScore,
+    emotionTag,
+    notes: sanitizeText(notes, 500),
+    activityDone,
+    sleepHours,
+    screenTime,
+    socialInteractionLevel,
+    stressLevel,
+    timestamp: logTimestamp,
+  };
+
+  let moodLog = await MoodLog.findOne({
+    userId: userObjectId,
+    timestamp: {
+      $gte: dayStart,
+      $lt: dayEnd,
+    },
   });
 
-  return res.status(201).json({
-    message: "Mood logged successfully",
+  const isUpdate = Boolean(moodLog);
+
+  if (moodLog) {
+    Object.assign(moodLog, payload);
+    await moodLog.save();
+  } else {
+    moodLog = await MoodLog.create({
+      userId: userObjectId,
+      ...payload,
+    });
+  }
+
+  const [patterns, recommendation] = await Promise.all([
+    detectUserPatterns(userObjectId),
+    generatePersonalizedRecommendation(userObjectId, { forceRefresh: true }),
+    setJson(
+      `emotional-state:${userId}`,
+      {
+        moodScore: moodLog.moodScore,
+        emotionTag: moodLog.emotionTag,
+        stressLevel: moodLog.stressLevel,
+        sleepHours: moodLog.sleepHours,
+        socialInteractionLevel: moodLog.socialInteractionLevel,
+        timestamp: moodLog.timestamp,
+      },
+      EMOTIONAL_STATE_TTL
+    ),
+  ]);
+
+  return res.status(isUpdate ? 200 : 201).json({
+    message: isUpdate ? "Mood log updated successfully" : "Mood logged successfully",
     log: moodLog,
+    patterns,
+    recommendation,
   });
 });
 
-// -----------------------------------------------------
-// Fetch Mood History
-// -----------------------------------------------------
 export const getMoodHistory = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { limit = 50, skip = 0, startDate, endDate } = req.query;
-
-  // Convert to ObjectId if needed
-  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
-    ? new mongoose.Types.ObjectId(userId)
-    : userId;
+  const userObjectId = toObjectId(userId);
 
   const query = { userId: userObjectId };
 
-  // Add date range filter if provided
   if (startDate || endDate) {
-    query.date = {};
-    if (startDate) {
-      query.date.$gte = new Date(startDate);
-    }
-    if (endDate) {
-      query.date.$lte = new Date(endDate);
-    }
+    query.timestamp = {};
+    if (startDate) query.timestamp.$gte = new Date(startDate);
+    if (endDate) query.timestamp.$lte = new Date(endDate);
   }
 
   const logs = await MoodLog.find(query)
-    .sort({ date: -1, createdAt: -1 })
-    .limit(parseInt(limit))
-    .skip(parseInt(skip));
+    .sort({ timestamp: -1, createdAt: -1 })
+    .limit(parseInt(limit, 10))
+    .skip(parseInt(skip, 10));
 
   const total = await MoodLog.countDocuments(query);
 
@@ -92,43 +113,31 @@ export const getMoodHistory = asyncHandler(async (req, res) => {
     logs,
     pagination: {
       total,
-      limit: parseInt(limit),
-      skip: parseInt(skip),
-      hasMore: parseInt(skip) + logs.length < total,
+      limit: parseInt(limit, 10),
+      skip: parseInt(skip, 10),
+      hasMore: parseInt(skip, 10) + logs.length < total,
     },
   });
 });
 
-// -----------------------------------------------------
-// Basic Mood Analytics (weekly/monthly trends)
-// -----------------------------------------------------
 export const getMoodAnalytics = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const { period = "week" } = req.query; // week or month
+  const { period = "week" } = req.query;
+  const userObjectId = toObjectId(userId);
 
-  // Convert userId to ObjectId if it's a string
-  const userObjectId = mongoose.Types.ObjectId.isValid(userId)
-    ? new mongoose.Types.ObjectId(userId)
-    : userId;
+  const groupBy =
+    period === "month"
+      ? {
+          year: { $year: "$timestamp" },
+          month: { $month: "$timestamp" },
+        }
+      : {
+          year: { $year: "$timestamp" },
+          week: {
+            $ceil: { $divide: [{ $dayOfYear: "$timestamp" }, 7] },
+          },
+        };
 
-  let groupBy;
-  if (period === "month") {
-    groupBy = {
-      year: { $year: "$date" },
-      month: { $month: "$date" },
-    };
-  } else {
-    // Week grouping - group by year and week number
-    // Using a simpler calculation: week = ceil(dayOfYear / 7)
-    groupBy = {
-      year: { $year: "$date" },
-      week: {
-        $ceil: { $divide: [{ $dayOfYear: "$date" }, 7] },
-      },
-    };
-  }
-
-  // Build project stage with conditional fields
   const projectStage = {
     _id: 1,
     avgMoodScore: { $round: ["$avgMoodScore", 2] },
@@ -137,19 +146,18 @@ export const getMoodAnalytics = asyncHandler(async (req, res) => {
     dates: 1,
     year: "$_id.year",
   };
-  
+
   if (period === "month") {
     projectStage.month = "$_id.month";
   } else {
     projectStage.week = "$_id.week";
   }
 
-  // Build sort stage
-  const sortStage = period === "month"
-    ? { $sort: { year: -1, month: -1 } }
-    : { $sort: { year: -1, week: -1 } };
+  const sortStage =
+    period === "month"
+      ? { $sort: { year: -1, month: -1 } }
+      : { $sort: { year: -1, week: -1 } };
 
-  // Aggregate pipeline for analytics
   const analytics = await MoodLog.aggregate([
     { $match: { userId: userObjectId } },
     {
@@ -158,14 +166,13 @@ export const getMoodAnalytics = asyncHandler(async (req, res) => {
         avgMoodScore: { $avg: "$moodScore" },
         count: { $sum: 1 },
         emotionTags: { $push: "$emotionTag" },
-        dates: { $push: "$date" },
+        dates: { $push: "$timestamp" },
       },
     },
     { $project: projectStage },
     sortStage,
   ]);
 
-  // Get emotion tag distribution
   const emotionDistribution = await MoodLog.aggregate([
     { $match: { userId: userObjectId } },
     {
@@ -177,7 +184,6 @@ export const getMoodAnalytics = asyncHandler(async (req, res) => {
     { $sort: { count: -1 } },
   ]);
 
-  // Get overall stats
   const overallStats = await MoodLog.aggregate([
     { $match: { userId: userObjectId } },
     {

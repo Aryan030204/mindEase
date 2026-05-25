@@ -71,7 +71,9 @@ export const moodAPI = {
 export const recommendationAPI = {
   getGeneral: () => api.get("/api/recommendations/general"),
   getPersonalized: () => api.get("/api/recommendations/personalized"),
-  updateStatus: (id, status) => api.patch(`/api/recommendations/${id}/status`, { status }),
+  getHistory: () => api.get("/api/recommendations/history"),
+  updateStatus: (recommendationId, activityId, action) =>
+    api.patch(`/api/recommendations/${recommendationId}/activities/${activityId}/status`, { action }),
 }
 
 // Chat API
@@ -80,17 +82,36 @@ export const chatAPI = {
   getHistory: (limit = 50) => api.get(`/api/chat/history?limit=${limit}`),
 }
 
+export const patternAPI = {
+  getPatterns: () => api.get("/api/patterns"),
+  getForecast: () => api.get("/api/patterns/forecast"),
+  refreshPatterns: () => api.post("/api/patterns/refresh"),
+}
+
 // Resource API
 export const resourceAPI = {
   getAll: (params) => api.get("/api/resources/all", { params }),
   getByCategory: (category) => api.get(`/api/resources/${category}`),
 }
 
+// Onboarding API
+export const onboardingAPI = {
+  start: () => api.get("/api/onboarding/start"),
+  answer: (data) => api.post("/api/onboarding/answer", data),
+  next: () => api.get("/api/onboarding/next"),
+  complete: (data) => api.post("/api/onboarding/complete", data),
+  profile: () => api.get("/api/onboarding/profile"),
+  listQuestions: () => api.get("/api/onboarding/questions"),
+  createQuestion: (data) => api.post("/api/onboarding/questions", data),
+  updateQuestion: (id, data) => api.put(`/api/onboarding/questions/${id}`, data),
+}
+
 // Insight API
 export const insightAPI = {
   getProfile: () => api.get("/api/insights/profile"),
-  getPatterns: () => api.get("/api/insights/patterns"),
-  getForecast: () => api.get("/api/insights/forecast"),
+  getPatterns: () => api.get("/api/patterns"),
+  getForecast: () => api.get("/api/patterns/forecast"),
+  getCollectiveSummary: () => api.get("/api/insights/collective-summary"),
 }
 
 export default api

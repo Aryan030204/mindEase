@@ -1,294 +1,176 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { moodAPI } from "@/lib/api";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
-import { Textarea } from "@/components/ui/Textarea";
-import { Select } from "@/components/ui/Select";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-import { Heart, CheckCircle2 } from "lucide-react";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { formatDate } from "@/lib/utils";
-import BackButton from "@/components/ui/BackButton";
+import { useMemo, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { motion } from "framer-motion"
+import toast from "react-hot-toast"
+import { Heart, MoonStar, Smartphone, Users } from "lucide-react"
+import { submitMoodLog } from "@/features/adaptive/adaptiveSlice"
+import { Button } from "@/components/ui/Button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
+import { Label } from "@/components/ui/Label"
+import { Select } from "@/components/ui/Select"
+import { Textarea } from "@/components/ui/Textarea"
+import LoadingSpinner from "@/components/ui/LoadingSpinner"
+import BackButton from "@/components/ui/BackButton"
 
-const EMOTIONS = [
-  "happy",
-  "sad",
-  "anxious",
-  "calm",
-  "angry",
-  "excited",
-  "tired",
-  "neutral",
-];
-const MOOD_COLORS = {
-  1: "bg-red-500",
-  2: "bg-orange-500",
-  3: "bg-yellow-500",
-  4: "bg-yellow-400",
-  5: "bg-blue-400",
-  6: "bg-blue-500",
-  7: "bg-green-400",
-  8: "bg-green-500",
-  9: "bg-emerald-500",
-  10: "bg-emerald-600",
-};
+const EMOTIONS = ["happy", "sad", "anxious", "calm", "neutral", "angry", "excited", "tired", "stressed", "overwhelmed"]
+const SOCIAL_OPTIONS = ["low", "medium", "high"]
 
 export default function MoodTracker() {
-  const [moodScore, setMoodScore] = useState(5);
-  const [emotionTag, setEmotionTag] = useState("neutral");
-  const [notes, setNotes] = useState("");
-  const [activityDone, setActivityDone] = useState(false);
+  const dispatch = useDispatch()
+  const { currentEmotionalState, moodStatus } = useSelector((state) => state.adaptive)
+  const [form, setForm] = useState({
+    moodScore: currentEmotionalState?.moodScore || 5,
+    emotionTag: currentEmotionalState?.emotionTag || "neutral",
+    notes: currentEmotionalState?.notes || "",
+    activityDone: currentEmotionalState?.activityDone || false,
+    sleepHours: currentEmotionalState?.sleepHours ?? 7,
+    screenTime: currentEmotionalState?.screenTime ?? 4,
+    socialInteractionLevel: currentEmotionalState?.socialInteractionLevel || "medium",
+    stressLevel: currentEmotionalState?.stressLevel ?? 5,
+  })
 
-  const queryClient = useQueryClient();
+  const cards = useMemo(
+    () => [
+      { label: "Sleep", key: "sleepHours", icon: MoonStar, min: 0, max: 12, step: 0.5 },
+      { label: "Screen Time", key: "screenTime", icon: Smartphone, min: 0, max: 16, step: 0.5 },
+      { label: "Stress", key: "stressLevel", icon: Heart, min: 1, max: 10, step: 1 },
+    ],
+    []
+  )
 
-  const { data: todayMood, isLoading } = useQuery({
-    queryKey: ["moodHistory"],
-    queryFn: () => moodAPI.getHistory({ limit: 1 }),
-  });
+  const updateField = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }))
+  }
 
-  const todayLog = todayMood?.data?.logs?.find(
-    (log) => new Date(log.date).toDateString() === new Date().toDateString(),
-  );
-
-  const mutation = useMutation({
-    mutationFn: (data) => moodAPI.addLog(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["moodHistory"] });
-      queryClient.invalidateQueries({ queryKey: ["moodAnalytics"] });
-      toast.success(
-        todayLog ? "Mood updated successfully!" : "Mood logged successfully!",
-      );
-      if (!todayLog) {
-        setMoodScore(5);
-        setEmotionTag("neutral");
-        setNotes("");
-        setActivityDone(false);
-      }
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to log mood");
-    },
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    mutation.mutate({
-      moodScore,
-      emotionTag,
-      notes,
-      activityDone,
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    const result = await dispatch(submitMoodLog(form))
+    if (submitMoodLog.fulfilled.match(result)) {
+      toast.success("Mood saved and adaptive systems refreshed.")
+    } else {
+      toast.error(result.payload || "Failed to save mood")
+    }
   }
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
-      >
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <BackButton />
-            <h1 className="text-3xl font-bold tracking-tight">Mood Tracker</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Log your daily mood and track your emotional well-being
-          </p>
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <BackButton />
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Mood Logging</h1>
         </div>
+        <p className="max-w-2xl text-sm leading-6 text-slate-600">
+          Add enough context for the adaptive engine to respond differently tomorrow than it does today.
+        </p>
       </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Mood Log Form */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
-                {todayLog ? "Update Today's Mood" : "Log Your Mood"}
-              </CardTitle>
-              <CardDescription>
-                {todayLog
-                  ? `You logged your mood on ${formatDate(todayLog.date)}. Update it below.`
-                  : "How are you feeling today?"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Mood Score */}
-                <div className="space-y-3">
-                  <Label>Mood Score: {moodScore}/10</Label>
-                  <div className="space-y-2">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={moodScore}
-                      onChange={(e) => setMoodScore(Number(e.target.value))}
-                      className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Very Low</span>
-                      <span>Very High</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setMoodScore(num)}
-                        className={`flex-1 h-8 rounded transition-all ${
-                          moodScore >= num ? MOOD_COLORS[num] : "bg-muted"
-                        } ${moodScore === num ? "ring-2 ring-primary ring-offset-2" : ""}`}
-                      />
-                    ))}
-                  </div>
-                </div>
+      <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <Card className="border-slate-200 bg-white/95">
+          <CardHeader>
+            <CardTitle>How are you feeling right now?</CardTitle>
+            <CardDescription>These signals feed pattern detection, forecasting, and personalized recommendations.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label>Mood Score: {form.moodScore}/10</Label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={form.moodScore}
+                onChange={(event) => updateField("moodScore", Number(event.target.value))}
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-emerald-100 accent-emerald-500"
+              />
+            </div>
 
-                {/* Emotion Tag */}
-                <div className="space-y-2">
-                  <Label htmlFor="emotion">Emotion</Label>
-                  <Select
-                    id="emotion"
-                    value={emotionTag}
-                    onChange={(e) => setEmotionTag(e.target.value)}
-                  >
-                    {EMOTIONS.map((emotion) => (
-                      <option key={emotion} value={emotion}>
-                        {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Emotion Tag</Label>
+                <Select value={form.emotionTag} onChange={(event) => updateField("emotionTag", event.target.value)}>
+                  {EMOTIONS.map((emotion) => (
+                    <option key={emotion} value={emotion}>
+                      {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
+                    </option>
+                  ))}
+                </Select>
+              </div>
 
-                {/* Notes */}
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes (Optional)</Label>
-                  <Textarea
-                    id="notes"
-                    placeholder="What's on your mind today?"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={4}
-                  />
-                </div>
-
-                {/* Activity Done */}
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="activityDone"
-                    checked={activityDone}
-                    onChange={(e) => setActivityDone(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <Label htmlFor="activityDone" className="cursor-pointer">
-                    Completed recommended activity today
-                  </Label>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={mutation.isPending}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-slate-400" />
+                  Social Interaction
+                </Label>
+                <Select
+                  value={form.socialInteractionLevel}
+                  onChange={(event) => updateField("socialInteractionLevel", event.target.value)}
                 >
-                  {mutation.isPending ? (
-                    <>
-                      <LoadingSpinner size="sm" className="mr-2" />
-                      Saving...
-                    </>
-                  ) : todayLog ? (
-                    "Update Mood"
-                  ) : (
-                    "Log Mood"
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
+                  {SOCIAL_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            </div>
 
-        {/* Today's Mood Display */}
-        {todayLog && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  Today's Mood
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                rows={5}
+                value={form.notes}
+                onChange={(event) => updateField("notes", event.target.value)}
+                placeholder="What happened today, and what feels most present right now?"
+              />
+            </div>
+
+            <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={form.activityDone}
+                onChange={(event) => updateField("activityDone", event.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              I completed a wellness activity today.
+            </label>
+
+            <Button type="submit" disabled={moodStatus === "loading"} className="w-full">
+              {moodStatus === "loading" ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Updating adaptive state...
+                </>
+              ) : (
+                "Save Mood and Recalculate"
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          {cards.map(({ label, key, icon: Icon, min, max, step }) => (
+            <Card key={key} className="border-slate-200 bg-white/95">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Icon className="h-4 w-4 text-emerald-500" />
+                  {label}
                 </CardTitle>
-                <CardDescription>
-                  Logged on {formatDate(todayLog.date)}
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">
-                      {todayLog.moodScore}
-                    </span>
-                    <span className="text-muted-foreground">/10</span>
-                  </div>
-                  <div className="mt-2 flex gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <div
-                        key={num}
-                        className={`flex-1 h-3 rounded ${
-                          todayLog.moodScore >= num
-                            ? MOOD_COLORS[num]
-                            : "bg-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Emotion</p>
-                  <p className="text-lg font-semibold capitalize">
-                    {todayLog.emotionTag}
-                  </p>
-                </div>
-                {todayLog.notes && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Notes</p>
-                    <p className="text-sm">{todayLog.notes}</p>
-                  </div>
-                )}
-                {todayLog.activityDone && (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-sm">Activity completed</span>
-                  </div>
-                )}
+              <CardContent className="space-y-3">
+                <div className="text-3xl font-bold text-slate-900">{form[key]}</div>
+                <input
+                  type="range"
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={form[key]}
+                  onChange={(event) => updateField(key, Number(event.target.value))}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-emerald-100 accent-emerald-500"
+                />
               </CardContent>
             </Card>
-          </motion.div>
-        )}
-      </div>
+          ))}
+        </div>
+      </form>
     </div>
-  );
+  )
 }

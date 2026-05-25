@@ -1,8 +1,8 @@
 import asyncHandler from "../utils/asyncHandler.js";
 
-export const validate = (schema) => {
+export const validate = (schema, property = "body") => {
   return asyncHandler(async (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
+    const { error, value } = schema.validate(req[property], {
       abortEarly: false,
       stripUnknown: true,
     });
@@ -15,7 +15,7 @@ export const validate = (schema) => {
       });
     }
 
-    req.body = value;
+    req[property] = value;
     next();
   });
 };

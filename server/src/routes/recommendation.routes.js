@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getPersonalizedRecommendations,
   getGeneralWellness,
+  getRecommendationHistory,
   updateRecommendationStatus,
 } from "../controllers/recommendation.controller.js";
 
@@ -13,8 +14,9 @@ const router = Router();
 
 router.get("/personalized", authMiddleware, getPersonalizedRecommendations);
 router.get("/general", authMiddleware, getGeneralWellness);
+router.get("/history", authMiddleware, getRecommendationHistory);
 router.patch(
-  "/:recommendationId/status",
+  "/:recommendationId/activities/:activityId/status",
   authMiddleware,
   validate(updateRecommendationStatusSchema),
   updateRecommendationStatus,

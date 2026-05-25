@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import ChatWidget from "../chat/ChatWidget"
+import OnboardingUpgradeBanner from "../onboarding/OnboardingUpgradeBanner"
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -46,6 +47,7 @@ export default function Layout() {
         <div className="lg:pl-64">
           <main className="p-4 md:p-6 lg:p-8">
             <div className="rounded-3xl border border-white/40 bg-white/85 p-4 shadow-2xl shadow-primary/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 md:p-5">
+              <OnboardingUpgradeBanner />
               <Outlet />
             </div>
           </main>

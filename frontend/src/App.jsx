@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { useAuth } from "./contexts/AuthContext"
 import { motion } from "framer-motion"
+import { loadOnboardingProfile, resetOnboardingState } from "./features/onboarding/onboardingSlice"
+import { fetchAdaptiveDashboard, resetAdaptiveState } from "./features/adaptive/adaptiveSlice"
 
 // Pages
 import Login from "./pages/Login"
@@ -14,11 +18,16 @@ import Resources from "./pages/Resources"
 import Profile from "./pages/Profile"
 import Layout from "./components/layout/Layout"
 import LoadingSpinner from "./components/ui/LoadingSpinner"
+import OnboardingWelcomePage from "./pages/onboarding/OnboardingWelcomePage"
+import OnboardingQuestionPage from "./pages/onboarding/OnboardingQuestionPage"
+import OnboardingCompletePage from "./pages/onboarding/OnboardingCompletePage"
+import OnboardingLayout from "./components/onboarding/OnboardingLayout"
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
+  const { profile, profileStatus } = useSelector((state) => state.onboarding)
 
-  if (loading) {
+  if (loading || (user && profileStatus === "loading")) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -30,13 +39,41 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />
   }
 
+  if (profile && !profile.onboardingCompleted) {
+    return <Navigate to="/onboarding/welcome" replace />
+  }
+
+  return children
+}
+
+function OnboardingRoute({ children }) {
+  const { user, loading } = useAuth()
+  const { profile, profileStatus } = useSelector((state) => state.onboarding)
+
+  if (loading || (user && profileStatus === "loading")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (profile?.onboardingCompleted && !profile?.needsOnboardingUpgrade) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return children
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
+  const { profile, profileStatus } = useSelector((state) => state.onboarding)
 
-  if (loading) {
+  if (loading || (user && profileStatus === "loading")) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -45,11 +82,15 @@ function PublicRoute({ children }) {
   }
 
   if (user) {
+    if (profile && !profile.onboardingCompleted) {
+      return <Navigate to="/onboarding/welcome" replace />
+    }
     return <Navigate to="/dashboard" replace />
   }
 
   return children
 }
+
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -72,6 +113,19 @@ function AnimatedPage({ children }) {
 }
 
 function App() {
+  const { user } = useAuth()
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (user) {
+      dispatch(loadOnboardingProfile())
+      dispatch(fetchAdaptiveDashboard())
+    } else {
+      dispatch(resetOnboardingState())
+      dispatch(resetAdaptiveState())
+    }
+  }, [dispatch, user])
+
   return (
     <BrowserRouter>
       <Routes>
@@ -95,6 +149,39 @@ function App() {
             </PublicRoute>
           }
         />
+        <Route
+          path="/onboarding"
+          element={
+            <OnboardingRoute>
+              <OnboardingLayout />
+            </OnboardingRoute>
+          }
+        >
+          <Route
+            path="welcome"
+            element={
+              <AnimatedPage>
+                <OnboardingWelcomePage />
+              </AnimatedPage>
+            }
+          />
+          <Route
+            path="question/:id"
+            element={
+              <AnimatedPage>
+                <OnboardingQuestionPage />
+              </AnimatedPage>
+            }
+          />
+          <Route
+            path="complete"
+            element={
+              <AnimatedPage>
+                <OnboardingCompletePage />
+              </AnimatedPage>
+            }
+          />
+        </Route>
         <Route
           path="/"
           element={

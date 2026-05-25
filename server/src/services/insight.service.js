@@ -3,7 +3,7 @@ import UserInsight from "../models/UserInsight.model.js";
 
 export const generateUserInsight = async (userId) => {
   const logs = await MoodLog.find({ userId })
-    .sort({ date: -1 })
+    .sort({ timestamp: -1 })
     .limit(14);
 
   if (!logs || logs.length === 0) {
@@ -70,7 +70,7 @@ export const generateUserInsight = async (userId) => {
 };
 
 export const detectPatterns = async (userId) => {
-  const logs = await MoodLog.find({ userId }).sort({ date: -1 }).limit(30);
+  const logs = await MoodLog.find({ userId }).sort({ timestamp: -1 }).limit(30);
   if (!logs || logs.length === 0) return [];
 
   const patterns = [];
@@ -78,7 +78,7 @@ export const detectPatterns = async (userId) => {
   // 1. Day pattern
   const dayScores = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
   logs.forEach(log => {
-    const day = new Date(log.date).getDay();
+    const day = new Date(log.timestamp).getDay();
     dayScores[day].push(log.moodScore);
   });
 
@@ -129,7 +129,7 @@ export const detectPatterns = async (userId) => {
 };
 
 export const forecastMood = async (userId) => {
-  const logs = await MoodLog.find({ userId }).sort({ date: -1 }).limit(7);
+  const logs = await MoodLog.find({ userId }).sort({ timestamp: -1 }).limit(7);
   if (!logs || logs.length === 0) {
     return { predictedMood: 5, confidence: 0 };
   }

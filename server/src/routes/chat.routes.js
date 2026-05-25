@@ -5,15 +5,17 @@ import {
 } from "../controllers/chat.controller.js";
 
 import authMiddleware from "../middlewares/auth.middleware.js";
+import { chatbotRateLimit } from "../middlewares/rateLimit.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
-import { chatMessageSchema } from "../utils/validators.js";
+import { chatContextSchema } from "../utils/validators.js";
 
 const router = Router();
 
 router.post(
   "/query",
   authMiddleware,
-  validate(chatMessageSchema),
+  chatbotRateLimit(),
+  validate(chatContextSchema),
   sendChatQuery
 );
 router.get("/history", authMiddleware, getChatHistory);
